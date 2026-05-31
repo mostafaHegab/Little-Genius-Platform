@@ -423,7 +423,6 @@ function buildStoryPayload(data) {
 	return {
 		title: data.title,
 		mediaUrl: data.mediaUrl,
-		pdfUrl: data.pdfUrl,
 		createdAt: new Date().toISOString(),
 	};
 }
@@ -432,7 +431,6 @@ function buildPlayPayload(data) {
 	return {
 		title: data.title,
 		mediaUrl: data.mediaUrl,
-		pdfUrl: data.pdfUrl,
 		createdAt: new Date().toISOString(),
 	};
 }
@@ -440,7 +438,6 @@ function buildPlayPayload(data) {
 function buildPdfPayload(data) {
 	return {
 		title: data.title,
-		mediaUrl: data.mediaUrl,
 		pdfUrl: data.pdfUrl,
 		createdAt: new Date().toISOString(),
 	};
