@@ -1,0 +1,356 @@
+:root {
+	--gold: #ffd700;
+	--pink: #ff69b4;
+	--indigo: #4338ca;
+}
+
+body {
+	font-family: "Cairo", sans-serif;
+	background: #4338ca;
+	margin: 0;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+	overflow-y: auto;
+}
+
+.hide {
+	display: none !important;
+}
+
+.main-title {
+	color: var(--gold);
+	font-size: clamp(2.5rem, 10vw, 3.8rem);
+	text-shadow: 4px 4px 0 #000;
+	text-align: center;
+	line-height: 1.1;
+	padding-top: 20px;
+	margin-bottom: 5px;
+	cursor: pointer;
+}
+
+.sub-text {
+	color: white;
+	text-align: center;
+	font-size: 1.2rem;
+	font-weight: 700;
+	margin-bottom: 2rem;
+	opacity: 0.9;
+}
+
+.card-home {
+	border-radius: 60px;
+	padding: 30px 20px;
+	text-align: center;
+	cursor: pointer;
+	transition: transform 0.1s ease;
+	box-shadow: 0 14px 0 rgba(0, 0, 0, 0.2);
+	width: 90%;
+	max-width: 380px;
+	margin: 15px auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	border: 4px solid rgba(255, 255, 255, 0.15);
+}
+
+.card-home:active {
+	transform: translateY(8px);
+	box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-text {
+	font-size: 26px;
+	font-weight: 900;
+	margin-top: 8px;
+	color: white;
+	text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.flower {
+	width: 110px;
+	height: 110px;
+	position: relative;
+	margin: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: transform 0.2s;
+}
+.flower:active {
+	transform: scale(0.9);
+}
+.flower-center {
+	width: 50px;
+	height: 50px;
+	background: #fbbf24;
+	border-radius: 50%;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2rem;
+	color: #78350f;
+	font-weight: 900;
+	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.petal {
+	position: absolute;
+	width: 45px;
+	height: 45px;
+	border-radius: 50% 50% 0 50%;
+	background: var(--pc);
+	transform-origin: bottom right;
+	z-index: 5;
+}
+
+.space-bg {
+	background: radial-gradient(circle at center, #1e1b4b, #03001e, #000) !important;
+	position: relative;
+	overflow-x: hidden;
+	min-height: 100%;
+	border-radius: 40px;
+}
+.planet-container {
+	position: relative;
+	width: 120px;
+	height: 120px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 25px;
+	cursor: pointer;
+	transition: transform 0.2s;
+}
+.planet-container:active {
+	transform: scale(0.9);
+}
+.planet {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 2.2rem;
+	position: relative;
+	z-index: 10;
+	font-weight: 900;
+	background: radial-gradient(circle at 30% 30%, var(--c1), #000);
+	box-shadow:
+		inset -10px -10px 20px rgba(0, 0, 0, 0.5),
+		0 0 20px var(--glow);
+}
+.ring {
+	position: absolute;
+	width: 130px;
+	height: 40px;
+	border: 6px solid var(--rc);
+	border-radius: 50%;
+	transform: rotateX(70deg) rotateY(10deg);
+	z-index: 5;
+	opacity: 0.7;
+	box-shadow: 0 0 15px var(--rc);
+}
+.rocket-anim {
+	position: absolute;
+	font-size: 5rem;
+	z-index: 20;
+	animation: rocketMove 15s linear infinite;
+	pointer-events: none;
+}
+@keyframes rocketMove {
+	0% {
+		left: -20%;
+		top: 90%;
+		transform: rotate(45deg);
+	}
+	100% {
+		left: 120%;
+		top: -10%;
+		transform: rotate(45deg);
+	}
+}
+
+.balloon {
+	width: 90px;
+	height: 115px;
+	background: var(--bc);
+	border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+	margin: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 2.5rem;
+	font-weight: 900;
+	animation: float 3s ease-in-out infinite alternate;
+	box-shadow:
+		inset -8px -8px 0 rgba(0, 0, 0, 0.1),
+		2px 10px 15px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+}
+.balloon:active {
+	transform: scale(0.9) translateY(-10px);
+}
+@keyframes float {
+	from {
+		transform: translateY(0px);
+	}
+	to {
+		transform: translateY(-20px);
+	}
+}
+
+.drawing-zone {
+	background: white;
+	border-radius: 50px;
+	position: relative;
+	height: 450px;
+	width: 95%;
+	max-width: 400px;
+	border: 15px solid #cbd5e1;
+	overflow: hidden;
+	margin: 0 auto;
+	box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+}
+#char-shadow {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 320px;
+	color: #f1f5f9;
+	z-index: 1;
+	pointer-events: none;
+	font-weight: 900;
+}
+#mainCvs {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 10;
+	touch-action: none;
+	width: 100%;
+	height: 100%;
+}
+
+.letter-nav-btn {
+	background: white;
+	color: #1e1b4b;
+	padding: 15px 25px;
+	border-radius: 20px;
+	font-size: 32px;
+	font-weight: 900;
+	flex-shrink: 0;
+	box-shadow: 0 5px 0 #e2e8f0;
+	border: 2px solid #f1f5f9;
+}
+.scroll-x {
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar {
+	display: none;
+}
+
+/* مؤشر الحروف المفعّلة سحابياً */
+.cloud-star {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background: #ff4757;
+	color: white;
+	border-radius: 50%;
+	width: 28px;
+	height: 28px;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+	z-index: 15;
+	animation: pulse 1.5s infinite alternate;
+}
+@keyframes pulse {
+	from {
+		transform: scale(1);
+	}
+	to {
+		transform: scale(1.15);
+	}
+}
+
+/* كرت المحتوى في الأقسام العامة */
+.content-card {
+	background: white;
+	border-radius: 30px;
+	padding: 20px;
+	border: 4px solid #ddd6fe;
+	box-shadow: 0 8px 0 #c084fc;
+	width: 90%;
+	max-width: 380px;
+	margin: 15px auto;
+	text-align: right;
+	cursor: pointer;
+	transition: all 0.1s ease;
+}
+.content-card:active {
+	transform: translateY(4px);
+	box-shadow: 0 4px 0 #c084fc;
+}
+
+/* نافذة التفاصيل الجميلة المنبثقة للطفل */
+.child-modal {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.8);
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+.child-modal-content {
+	background: white;
+	border-radius: 40px;
+	width: 100%;
+	max-width: 450px;
+	border: 8px solid var(--gold);
+	box-shadow: 0 20px 0 rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn {
+	from {
+		transform: scale(0.7);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.video-wrapper {
+	position: relative;
+	padding-bottom: 56.25%;
+	height: 0;
+	overflow: hidden;
+	border-radius: 24px;
+	border: 4px solid #818cf8;
+}
+.video-wrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: none;
+}
