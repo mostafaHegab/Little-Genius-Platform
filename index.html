@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title>منصة العبقري الصغير</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@900&display=swap" rel="stylesheet" />
+		<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+		<!-- مكتبات الاتصال السحابي الآمن ونظام المصادقة المشفر من Firebase -->
+		<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+		<style>
+			:root {
+				--gold: #ffd700;
+				--pink: #ff69b4;
+				--indigo: #4338ca;
+			}
+
+			body {
+				font-family: "Cairo", sans-serif;
+				background: #4338ca;
+				margin: 0;
+				user-select: none;
+				-webkit-tap-highlight-color: transparent;
+				overflow-y: auto;
+			}
+
+			.hide {
+				display: none !important;
+			}
+
+			.main-title {
+				color: var(--gold);
+				font-size: clamp(2.5rem, 10vw, 3.8rem);
+				text-shadow: 4px 4px 0 #000;
+				text-align: center;
+				line-height: 1.1;
+				padding-top: 20px;
+				margin-bottom: 5px;
+				cursor: pointer;
+			}
+
+			.sub-text {
+				color: white;
+				text-align: center;
+				font-size: 1.2rem;
+				font-weight: 700;
+				margin-bottom: 2rem;
+				opacity: 0.9;
+			}
+
+			.card-home {
+				border-radius: 60px;
+				padding: 30px 20px;
+				text-align: center;
+				cursor: pointer;
+				transition: transform 0.1s ease;
+				box-shadow: 0 14px 0 rgba(0, 0, 0, 0.2);
+				width: 90%;
+				max-width: 380px;
+				margin: 15px auto;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				border: 4px solid rgba(255, 255, 255, 0.15);
+			}
+
+			.card-home:active {
+				transform: translateY(8px);
+				box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+			}
+
+			.card-text {
+				font-size: 26px;
+				font-weight: 900;
+				margin-top: 8px;
+				color: white;
+				text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+			}
+
+			.flower {
+				width: 110px;
+				height: 110px;
+				position: relative;
+				margin: 15px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				transition: transform 0.2s;
+			}
+			.flower:active {
+				transform: scale(0.9);
+			}
+			.flower-center {
+				width: 50px;
+				height: 50px;
+				background: #fbbf24;
+				border-radius: 50%;
+				z-index: 10;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 2rem;
+				color: #78350f;
+				font-weight: 900;
+				box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+			.petal {
+				position: absolute;
+				width: 45px;
+				height: 45px;
+				border-radius: 50% 50% 0 50%;
+				background: var(--pc);
+				transform-origin: bottom right;
+				z-index: 5;
+			}
+
+			.space-bg {
+				background: radial-gradient(circle at center, #1e1b4b, #03001e, #000) !important;
+				position: relative;
+				overflow-x: hidden;
+				min-height: 100%;
+				border-radius: 40px;
+			}
+			.planet-container {
+				position: relative;
+				width: 120px;
+				height: 120px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: 25px;
+				cursor: pointer;
+				transition: transform 0.2s;
+			}
+			.planet-container:active {
+				transform: scale(0.9);
+			}
+			.planet {
+				width: 80px;
+				height: 80px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 2.2rem;
+				position: relative;
+				z-index: 10;
+				font-weight: 900;
+				background: radial-gradient(circle at 30% 30%, var(--c1), #000);
+				box-shadow:
+					inset -10px -10px 20px rgba(0, 0, 0, 0.5),
+					0 0 20px var(--glow);
+			}
+			.ring {
+				position: absolute;
+				width: 130px;
+				height: 40px;
+				border: 6px solid var(--rc);
+				border-radius: 50%;
+				transform: rotateX(70deg) rotateY(10deg);
+				z-index: 5;
+				opacity: 0.7;
+				box-shadow: 0 0 15px var(--rc);
+			}
+			.rocket-anim {
+				position: absolute;
+				font-size: 5rem;
+				z-index: 20;
+				animation: rocketMove 15s linear infinite;
+				pointer-events: none;
+			}
+			@keyframes rocketMove {
+				0% {
+					left: -20%;
+					top: 90%;
+					transform: rotate(45deg);
+				}
+				100% {
+					left: 120%;
+					top: -10%;
+					transform: rotate(45deg);
+				}
+			}
+
+			.balloon {
+				width: 90px;
+				height: 115px;
+				background: var(--bc);
+				border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+				margin: 15px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 2.5rem;
+				font-weight: 900;
+				animation: float 3s ease-in-out infinite alternate;
+				box-shadow:
+					inset -8px -8px 0 rgba(0, 0, 0, 0.1),
+					2px 10px 15px rgba(0, 0, 0, 0.2);
+				cursor: pointer;
+			}
+			.balloon:active {
+				transform: scale(0.9) translateY(-10px);
+			}
+			@keyframes float {
+				from {
+					transform: translateY(0px);
+				}
+				to {
+					transform: translateY(-20px);
+				}
+			}
+
+			.drawing-zone {
+				background: white;
+				border-radius: 50px;
+				position: relative;
+				height: 450px;
+				width: 95%;
+				max-width: 400px;
+				border: 15px solid #cbd5e1;
+				overflow: hidden;
+				margin: 0 auto;
+				box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+			}
+			#char-shadow {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 320px;
+				color: #f1f5f9;
+				z-index: 1;
+				pointer-events: none;
+				font-weight: 900;
+			}
+			#mainCvs {
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 10;
+				touch-action: none;
+				width: 100%;
+				height: 100%;
+			}
+
+			.letter-nav-btn {
+				background: white;
+				color: #1e1b4b;
+				padding: 15px 25px;
+				border-radius: 20px;
+				font-size: 32px;
+				font-weight: 900;
+				flex-shrink: 0;
+				box-shadow: 0 5px 0 #e2e8f0;
+				border: 2px solid #f1f5f9;
+			}
+			.scroll-x {
+				overflow-x: auto;
+				scrollbar-width: none;
+			}
+			.scroll-x::-webkit-scrollbar {
+				display: none;
+			}
+
+			/* مؤشر الحروف المفعّلة سحابياً */
+			.cloud-star {
+				position: absolute;
+				top: -5px;
+				right: -5px;
+				background: #ff4757;
+				color: white;
+				border-radius: 50%;
+				width: 28px;
+				height: 28px;
+				font-size: 14px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: bold;
+				box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+				z-index: 15;
+				animation: pulse 1.5s infinite alternate;
+			}
+			@keyframes pulse {
+				from {
+					transform: scale(1);
+				}
+				to {
+					transform: scale(1.15);
+				}
+			}
+
+			/* كرت المحتوى في الأقسام العامة */
+			.content-card {
+				background: white;
+				border-radius: 30px;
+				padding: 20px;
+				border: 4px solid #ddd6fe;
+				box-shadow: 0 8px 0 #c084fc;
+				width: 90%;
+				max-width: 380px;
+				margin: 15px auto;
+				text-align: right;
+				cursor: pointer;
+				transition: all 0.1s ease;
+			}
+			.content-card:active {
+				transform: translateY(4px);
+				box-shadow: 0 4px 0 #c084fc;
+			}
+
+			/* نافذة التفاصيل الجميلة المنبثقة للطفل */
+			.child-modal {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.8);
+				z-index: 100;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 20px;
+			}
+			.child-modal-content {
+				background: white;
+				border-radius: 40px;
+				width: 100%;
+				max-width: 450px;
+				border: 8px solid var(--gold);
+				box-shadow: 0 20px 0 rgba(0, 0, 0, 0.3);
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+			}
+			@keyframes popIn {
+				from {
+					transform: scale(0.7);
+					opacity: 0;
+				}
+				to {
+					transform: scale(1);
+					opacity: 1;
+				}
+			}
+
+			.video-wrapper {
+				position: relative;
+				padding-bottom: 56.25%;
+				height: 0;
+				overflow: hidden;
+				border-radius: 24px;
+				border: 4px solid #818cf8;
+			}
+			.video-wrapper iframe {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				border: none;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- الشاشة الرئيسية -->
+		<div id="home" class="min-h-screen flex flex-col items-center py-10 px-4">
+			<div class="relative w-full text-center">
+				<!-- الضغط على عنوان المنصة يفتح شاشة التحقق السحابية المشفرة -->
+				<h1 class="main-title font-black" onclick="openAdminGate()">منصة العبقري الصغير</h1>
+			</div>
+			<p class="sub-text">هيا نتعلم ونلعب 🌈 🚀</p>
+
+			<div class="card-home bg-[#FF69B4]" onclick="showDash('خطواتي الأولى', 'step')">
+				<span class="text-7xl">⭐</span>
+				<span class="card-text">خطواتي الأولى</span>
+			</div>
+
+			<div class="card-home bg-[#fbbf24]" onclick="showDash('عالم حروفي KG1', 'kg1')">
+				<span class="text-7xl">🎒</span>
+				<span class="card-text">عالم حروفي KG1</span>
+			</div>
+
+			<div class="card-home bg-[#10b981]" onclick="showDash('البطل الذكي KG2', 'kg2')">
+				<span class="text-7xl">🚀</span>
+				<span class="card-text">البطل الذكي KG2</span>
+			</div>
+		</div>
+
+		<!-- لوحة التحكم في المستويات -->
+		<div id="dash" class="hide h-screen flex flex-col bg-indigo-900">
+			<div class="p-5 bg-indigo-950 flex justify-between items-center text-white border-b-4 border-indigo-800">
+				<button onclick="nav('home')" class="bg-red-500 px-6 py-2 rounded-2xl font-black text-xl shadow-[0_5px_0_#b91c1c]">الرئيسية 🏠</button>
+				<span id="lvl-name" class="font-black text-2xl text-yellow-400"></span>
+				<div class="w-12"></div>
+			</div>
+
+			<div class="grid grid-cols-2 gap-4 p-4 overflow-y-auto flex-1">
+				<div class="card-home !bg-blue-600 !w-full !m-0 !rounded-3xl !py-6" onclick="openAct('letters')">
+					<span class="text-5xl">أ ب م</span>
+					<span class="card-text !text-xl">الحروف</span>
+				</div>
+				<div class="card-home !bg-orange-500 !w-full !m-0 !rounded-3xl !py-6" onclick="openAct('draw')">
+					<span class="text-5xl">🖍️</span>
+					<span class="card-text !text-xl">ارسم ولون</span>
+				</div>
+				<div class="card-home !bg-purple-600 !w-full !m-0 !rounded-3xl !py-6" onclick="openAct('stories')">
+					<span class="text-5xl">📖</span>
+					<span class="card-text !text-xl">القصص</span>
+				</div>
+				<div class="card-home !bg-teal-500 !w-full !m-0 !rounded-3xl !py-6" onclick="openAct('play')">
+					<span class="text-5xl">🎮</span>
+					<span class="card-text !text-xl">هيا نلعب</span>
+				</div>
+				<div class="card-home !bg-red-600 !w-full !m-0 !rounded-3xl !py-8 col-span-2" onclick="openAct('pdf')">
+					<span class="text-5xl">📄</span>
+					<span class="card-text !text-xl">ملفات PDF للطباعة</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- شاشة النشاط للأطفال -->
+		<div id="act" class="hide h-screen flex flex-col bg-[#f8fafc]">
+			<div class="bg-indigo-950 p-4 flex justify-between items-center text-white">
+				<div class="flex gap-2">
+					<button onclick="nav('home')" class="bg-yellow-500 text-black px-4 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b45309]">الرئيسية</button>
+					<button onclick="nav('dash')" class="bg-red-500 px-4 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b91c1c]">رجوع</button>
+				</div>
+				<span id="act-title" class="font-black text-xl text-yellow-400"></span>
+				<button id="v-btn" class="hide bg-green-500 px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#15803d]" onclick="checkWork()">تم ✅</button>
+			</div>
+			<div id="act-body" class="flex-1 overflow-y-auto flex flex-wrap justify-center content-start relative p-4"></div>
+		</div>
+
+		<!-- نافذة تسجيل الدخول السحابي المشفر للمعلمة (Firebase Authentication) -->
+		<div id="lock-modal" class="child-modal hide">
+			<div class="child-modal-content p-6 text-center space-y-4 max-w-sm">
+				<span class="text-6xl block">🔐</span>
+				<h3 class="font-black text-xl text-indigo-950">بوابة المعلمة الآمنة</h3>
+				<p class="text-xs text-gray-400 leading-relaxed">يرجى تسجيل الدخول سحابياً للتحكم في المنصة</p>
+
+				<div class="space-y-3 text-right">
+					<div>
+						<label class="block text-xs font-bold text-gray-500 mb-1">البريد الإلكتروني:</label>
+						<input
+							type="email"
+							id="admin-email"
+							class="w-full p-3 rounded-xl border-2 border-indigo-100 outline-none text-sm text-center font-bold"
+							placeholder="your-name@gmail.com"
+							required
+						/>
+					</div>
+					<div>
+						<label class="block text-xs font-bold text-gray-500 mb-1">كلمة السر:</label>
+						<input
+							type="password"
+							id="admin-password"
+							class="w-full p-3 rounded-xl border-2 border-indigo-100 outline-none text-sm text-center font-bold"
+							placeholder="••••••••"
+							required
+						/>
+					</div>
+				</div>
+
+				<div class="flex gap-2 pt-2">
+					<button onclick="loginAdmin()" class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold active:scale-95 text-sm">تسجيل دخول 🔑</button>
+					<button onclick="closeLockModal()" class="flex-1 bg-red-100 text-red-600 py-3 rounded-2xl font-bold active:scale-95 text-sm">إلغاء ❌</button>
+				</div>
+				<p class="text-[10px] text-gray-400">ملاحظة: أول بريد وكلمة سر تكتبينهم سيتم تسجيلهم كحسابك الرئيسي تلقائياً!</p>
+			</div>
+		</div>
+
+		<!-- لوحة تحكم الأدمن السحرية لتعديل محتوى الحروف والملفات سحابياً -->
+		<div id="admin-screen" class="hide h-screen flex flex-col bg-white">
+			<div class="p-5 bg-indigo-950 text-white flex justify-between items-center">
+				<button onclick="logoutAdmin()" class="bg-red-500 px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b91c1c]">تسجيل خروج 🚪</button>
+				<span class="font-black text-xl text-yellow-400">لوحة تحكم المعلمة 👩‍🏫</span>
+				<div class="w-12"></div>
+			</div>
+
+			<div class="flex-1 overflow-y-auto p-6 space-y-6 max-w-md mx-auto w-full">
+				<form id="admin-form" class="space-y-4 bg-purple-50 p-6 rounded-3xl border-4 border-purple-200">
+					<h3 class="font-black text-purple-950 text-lg mb-2">إضافة وتحديث محتوى سحابياً:</h3>
+
+					<!-- 1. اختيار المستوى -->
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">اختر المستوى الدراسي:</label>
+						<select id="admin-level-select" class="w-full p-3 rounded-2xl border-2 border-purple-300 outline-none text-sm font-bold bg-white" required>
+							<option value="step">خطواتي الأولى ⭐</option>
+							<option value="kg1">عالم حروفي KG1 🎒</option>
+							<option value="kg2">البطل الذكي KG2 🚀</option>
+						</select>
+					</div>
+
+					<!-- 2. اختيار القسم -->
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">اختر القسم المستهدف:</label>
+						<select id="admin-category-select" onchange="toggleLetterField()" class="w-full p-3 rounded-2xl border-2 border-purple-300 outline-none text-sm font-bold bg-white" required>
+							<option value="letters">ألبوم الحروف 🔤</option>
+							<option value="stories">القصص 📖</option>
+							<option value="play">هيا نلعب (ألعاب تفاعلية) 🎮</option>
+							<option value="pdf">ملفات PDF للطباعة 📄</option>
+						</select>
+					</div>
+
+					<!-- 3. اختيار الحرف (يظهر فقط عند اختيار قسم الحروف) -->
+					<div id="admin-letter-field">
+						<label class="block text-xs font-bold mb-1 text-gray-600">اختر الحرف للتعديل:</label>
+						<select id="admin-letter-select" class="w-full p-3 rounded-2xl border-2 border-purple-300 outline-none text-sm font-bold bg-white">
+							<!-- سيتم ملؤه تلقائياً بترتيب الحروف الأبجدية ALPHA -->
+						</select>
+					</div>
+
+					<!-- 4. عنوان المحتوى (يظهر فقط للألعاب والقصص والـ pdf) -->
+					<div id="admin-title-field" class="hide">
+						<label class="block text-xs font-bold mb-1 text-gray-600">عنوان الدرس / اللعبة / القصة:</label>
+						<input type="text" id="admin-content-title" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="مثال: قصة الصدق منجاة أو لعبة التوصيل" />
+					</div>
+
+					<!-- 5. الروابط -->
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">رابط الفيديو أو لعبة كانفا (YouTube/Canva):</label>
+						<input type="url" id="admin-media-url" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="https://youtube.com/watch?v=..." />
+					</div>
+
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">رابط ورقة عمل أو ملف PDF (Google Drive):</label>
+						<input type="url" id="admin-pdf-url" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="https://drive.google.com/..." />
+					</div>
+
+					<button type="submit" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95">حفظ ونشر فوراً 🚀</button>
+				</form>
+
+				<div class="bg-gray-50 p-6 rounded-3xl border">
+					<h3 class="font-bold text-gray-700 mb-4">المحتويات المفعلة حالياً:</h3>
+					<div id="active-letters-list" class="space-y-4">
+						<!-- سيتم عرض المحتويات مع تفاصيلها وزر للحذف -->
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- نافذة منبثقة تفاعلية للطفل لعرض المحتوى للرسومات والالعاب -->
+		<div id="child-modal" class="child-modal hide">
+			<div class="child-modal-content">
+				<div class="p-4 bg-indigo-600 text-white flex justify-between items-center">
+					<h3 id="modal-letter-title" class="font-black text-2xl text-yellow-300">عرض المحتوى</h3>
+					<button onclick="closeChildModal()" class="bg-red-500 text-white font-black px-4 py-2 rounded-full text-sm active:scale-90">إغلاق ❌</button>
+				</div>
+
+				<div class="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
+					<!-- مشغل الفيديوهات والألعاب التفاعلية -->
+					<div id="modal-video-section" class="hide">
+						<p class="font-bold text-indigo-900 mb-2">📺 العب وشاهد مع البطل:</p>
+						<div class="video-wrapper" id="modal-video-iframe-wrapper"></div>
+					</div>
+
+					<!-- زر تحميل الـ PDF -->
+					<div id="modal-pdf-section" class="hide bg-green-50 p-6 rounded-3xl border-2 border-green-200 text-center">
+						<span class="text-4xl block mb-2">📝</span>
+						<h4 class="font-bold text-green-950 mb-3">جاهز للتحميل والطباعة!</h4>
+						<a id="modal-pdf-btn" href="#" target="_blank" class="inline-block bg-green-500 text-white px-8 py-3 rounded-2xl font-bold shadow-md active:scale-95">تحميل الملف 🖨️</a>
+					</div>
+
+					<!-- رسالة في حال عدم وجود محتوى مضاف بعد -->
+					<div id="modal-empty-section" class="text-center py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+						<span class="text-5xl block mb-4">🎈</span>
+						<p class="font-black text-gray-600 text-lg">مفاجأة قريبة جداً!</p>
+						<p class="text-sm text-gray-400 mt-1">معلمتي تحضر لي ألعاباً وأوراق تلوين رائعة في هذا القسم.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- نافذة تنبيه مخصصة للأطفال بدل الـ Alert المزعج لتجنب التعليق -->
+		<div id="custom-alert" class="child-modal hide">
+			<div class="child-modal-content p-6 text-center space-y-4 max-w-sm">
+				<span id="alert-icon" class="text-6xl block">🌟</span>
+				<p id="alert-text" class="text-xl font-black text-indigo-950"></p>
+				<button onclick="closeAlert()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-bold shadow-md active:scale-95">رائع! 👍</button>
+			</div>
+		</div>
+
+		<script>
+			const ALPHA = ["أ", "ب", "م", "ح", "ج", "د", "خ", "ت", "ل", "س", "ن", "ر", "ف", "ك", "ق", "ي", "ع", "ش", "و", "هـ", "ذ", "ظ", "ز", "ط", "ص", "ض", "ث", "غ"];
+			let currentLevelMode = "step"; // step, kg1, kg2
+			let currentActivityMode = "letters"; // letters, draw, stories, play, pdf
+			let canvas,
+				ctx,
+				drawing = false;
+
+			// تهيئة المتغيرات الأساسية لدعم التخزين المزدوج (السحابة والمحلي)
+			let db = null;
+			let auth = null;
+			let isCloudMode = false;
+			let appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+			let collectionPath = `artifacts/${appId}/public/data/lettersData`;
+			let cloudData = {};
+
+			// محاولة جلب إعدادات Firebase من البيئة السحابية لتشغيلها بشكل آمن وتجنب التعليق
+			function setupFirebaseEnvironment() {
+				try {
+					if (typeof __firebase_config !== "undefined" && __firebase_config) {
+						const firebaseConfig = JSON.parse(__firebase_config);
+						firebase.initializeApp(firebaseConfig);
+						db = firebase.firestore();
+						auth = firebase.auth();
+						isCloudMode = true;
+					}
+				} catch (err) {
+					console.warn("Using Offline Memory Mode directly inside Shortcuts.");
+				}
+			}
+
+			async function initCloudApp() {
+				setupFirebaseEnvironment();
+
+				if (isCloudMode && auth) {
+					try {
+						// تسجيل دخول تلقائي مبدئي لعرض البيانات للأطفال دون طلب شاشة الحماية
+						if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+							await auth.signInWithCustomToken(__initial_auth_token);
+						} else if (!auth.currentUser) {
+							await auth.signInAnonymously();
+						}
+						listenToCloudData();
+					} catch (err) {
+						console.error("Auth failed, loading offline storage mode:", err);
+						isCloudMode = false;
+						listenToCloudData();
+					}
+				} else {
+					listenToCloudData();
+				}
+
+				setupAdminSelect();
+			}
+
+			function listenToCloudData() {
+				if (isCloudMode && db) {
+					db.collection(collectionPath).onSnapshot(
+						(snapshot) => {
+							cloudData = {};
+							snapshot.forEach((doc) => {
+								cloudData[doc.id] = doc.data();
+							});
+
+							updateActiveAlphabetVisuals();
+							updateAdminList();
+
+							if (document.getElementById("act").classList.contains("hide") === false) {
+								refreshActivityContent();
+							}
+						},
+						(error) => {
+							console.error("Firebase fetch error, fallback to offline:", error);
+							fallbackToLocalStorage();
+						},
+					);
+				} else {
+					fallbackToLocalStorage();
+				}
+			}
+
+			function fallbackToLocalStorage() {
+				try {
+					const localStr = localStorage.getItem("genius_kids_v3_local_data") || "{}";
+					cloudData = JSON.parse(localStr);
+				} catch (e) {
+					cloudData = {};
+				}
+				updateActiveAlphabetVisuals();
+				updateAdminList();
+				if (document.getElementById("act").classList.contains("hide") === false) {
+					refreshActivityContent();
+				}
+			}
+
+			/* بوابة الدخول السحابية المشفرة */
+			function openAdminGate() {
+				if (isCloudMode && auth && auth.currentUser && !auth.currentUser.isAnonymous) {
+					nav("admin-screen");
+				} else {
+					document.getElementById("admin-email").value = "";
+					document.getElementById("admin-password").value = "";
+					document.getElementById("lock-modal").classList.remove("hide");
+				}
+			}
+
+			function closeLockModal() {
+				document.getElementById("lock-modal").classList.add("hide");
+			}
+
+			async function loginAdmin() {
+				const email = document.getElementById("admin-email").value.trim();
+				const password = document.getElementById("admin-password").value;
+
+				if (!email || !password) {
+					showCustomAlert("⚠️", "يرجى كتابة البريد الإلكتروني وكلمة السر!");
+					return;
+				}
+
+				if (isCloudMode && auth) {
+					try {
+						await auth.signInWithEmailAndPassword(email, password);
+						closeLockModal();
+						nav("admin-screen");
+					} catch (err) {
+						if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+							try {
+								await auth.createUserWithEmailAndPassword(email, password);
+								closeLockModal();
+								nav("admin-screen");
+								showCustomAlert("👑", "أهلاً بكِ معلمتنا العبقرية! تم إنشاء حسابكِ السحابي المؤمن بنجاح.");
+							} catch (signupErr) {
+								showCustomAlert("❌", "خطأ في تسجيل الدخول أو الرمز خاطئ.");
+							}
+						} else {
+							showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
+						}
+					}
+				} else {
+					if (password === "2026") {
+						closeLockModal();
+						nav("admin-screen");
+					} else {
+						showCustomAlert("❌", "رمز المرور غير صحيح!");
+					}
+				}
+			}
+
+			async function logoutAdmin() {
+				if (isCloudMode && auth) {
+					try {
+						await auth.signOut();
+						await auth.signInAnonymously();
+					} catch (e) {}
+				}
+				nav("home");
+				showCustomAlert("🚪", "تم تسجيل خروجكِ بأمان من الإدارة.");
+			}
+
+			function toggleLetterField() {
+				const cat = document.getElementById("admin-category-select").value;
+				const letterField = document.getElementById("admin-letter-field");
+				const titleField = document.getElementById("admin-title-field");
+
+				if (cat === "letters") {
+					letterField.classList.remove("hide");
+					titleField.classList.add("hide");
+					document.getElementById("admin-content-title").required = false;
+				} else {
+					letterField.classList.add("hide");
+					titleField.classList.remove("hide");
+					document.getElementById("admin-content-title").required = true;
+				}
+			}
+
+			function setupAdminSelect() {
+				const select = document.getElementById("admin-letter-select");
+				select.innerHTML = "";
+				ALPHA.forEach((letter) => {
+					const opt = document.createElement("option");
+					opt.value = letter;
+					opt.innerText = `حرف (${letter})`;
+					select.appendChild(opt);
+				});
+			}
+
+			function updateActiveAlphabetVisuals() {
+				ALPHA.forEach((letter) => {
+					const el = document.getElementById(`letter-wrapper-${letter}`);
+					if (el) {
+						const cloudKey = `${currentLevelMode}_letters_${letter}`;
+						let star = el.querySelector(".cloud-star");
+						if (cloudData[cloudKey]) {
+							if (!star) {
+								star = document.createElement("div");
+								star.className = "cloud-star";
+								star.innerText = "⭐";
+								el.appendChild(star);
+							}
+						} else {
+							if (star) star.remove();
+						}
+					}
+				});
+			}
+
+			function updateAdminList() {
+				const container = document.getElementById("active-letters-list");
+				container.innerHTML = "";
+
+				const activeKeys = Object.keys(cloudData);
+				if (activeKeys.length === 0) {
+					container.innerHTML = `<p class="text-xs text-gray-400 text-center">لا توجد محتويات مضافة حالياً.</p>`;
+					return;
+				}
+
+				const levelNames = { step: "خطواتي الأولى", kg1: "KG1", kg2: "KG2" };
+				const catNames = { letters: "ألبوم الحروف", stories: "القصص", play: "هيا نلعب", pdf: "ملفات الطباعة" };
+
+				activeKeys.forEach((key) => {
+					const item = cloudData[key];
+					const row = document.createElement("div");
+					row.className = "p-3 bg-white rounded-2xl border text-sm space-y-1 relative";
+
+					const levelDisplay = levelNames[item.level] || item.level;
+					const catDisplay = catNames[item.category] || item.category;
+					const targetDisplay = item.category === "letters" ? `حرف (${item.letter})` : item.title;
+
+					row.innerHTML = `
+                    <div class="font-bold text-gray-800 text-sm">📍 ${levelDisplay} ⬅️ ${catDisplay}</div>
+                    <div class="text-indigo-600 font-bold text-xs">🎯 : ${targetDisplay}</div>
+                    <button onclick="deleteContentCloud('${key}')" class="absolute top-2 left-2 bg-red-100 text-red-600 px-3 py-1 rounded-xl text-xs font-bold active:scale-95">حذف 🗑️</button>
+                `;
+					container.appendChild(row);
+				});
+			}
+
+			document.getElementById("admin-form").addEventListener("submit", async (e) => {
+				e.preventDefault();
+				const level = document.getElementById("admin-level-select").value;
+				const category = document.getElementById("admin-category-select").value;
+				const letter = document.getElementById("admin-letter-select").value;
+				const title = document.getElementById("admin-content-title").value;
+				const mediaUrl = document.getElementById("admin-media-url").value;
+				const pdfUrl = document.getElementById("admin-pdf-url").value;
+
+				let documentId = "";
+				if (category === "letters") {
+					documentId = `${level}_letters_${letter}`;
+				} else {
+					documentId = `${level}_${category}_${Date.now()}`;
+				}
+
+				const payload = {
+					id: documentId,
+					level: level,
+					category: category,
+					letter: category === "letters" ? letter : "",
+					title: category === "letters" ? `حرف ${letter}` : title,
+					mediaUrl: mediaUrl,
+					pdfUrl: pdfUrl,
+					createdAt: new Date().toISOString(),
+				};
+
+				if (isCloudMode && db) {
+					try {
+						await db.collection(collectionPath).doc(documentId).set(payload);
+						showCustomAlert("🌟", "تم الحفظ والنشر بنجاح سحابياً!");
+					} catch (err) {
+						saveToLocalStore(documentId, payload);
+						showCustomAlert("💾", "تم تفعيل وضع حفظ الموبايل الداخلي بنجاح!");
+					}
+				} else {
+					saveToLocalStore(documentId, payload);
+					showCustomAlert("💾", "تم حفظ وتحديث المحتوى بنجاح داخل هاتفك!");
+				}
+
+				document.getElementById("admin-form").reset();
+				toggleLetterField();
+				confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+			});
+
+			function saveToLocalStore(id, data) {
+				cloudData[id] = data;
+				localStorage.setItem("genius_kids_v3_local_data", JSON.stringify(cloudData));
+				updateActiveAlphabetVisuals();
+				updateAdminList();
+				if (document.getElementById("act").classList.contains("hide") === false) {
+					refreshActivityContent();
+				}
+			}
+
+			async function deleteContentCloud(id) {
+				if (confirm("هل تريدين حذف هذا المحتوى نهائياً؟")) {
+					if (isCloudMode && db) {
+						try {
+							await db.collection(collectionPath).doc(id).delete();
+							showCustomAlert("🗑️", "تم الحذف بنجاح.");
+						} catch (err) {
+							deleteFromLocalStore(id);
+						}
+					} else {
+						deleteFromLocalStore(id);
+						showCustomAlert("🗑️", "تم مسح المحتوى تماماً من موبايلك.");
+					}
+				}
+			}
+
+			function deleteFromLocalStore(id) {
+				delete cloudData[id];
+				localStorage.setItem("genius_kids_v3_local_data", JSON.stringify(cloudData));
+				updateActiveAlphabetVisuals();
+				updateAdminList();
+				if (document.getElementById("act").classList.contains("hide") === false) {
+					refreshActivityContent();
+				}
+			}
+
+			function showCustomAlert(icon, text) {
+				document.getElementById("alert-icon").innerText = icon;
+				document.getElementById("alert-text").innerText = text;
+				document.getElementById("custom-alert").classList.remove("hide");
+			}
+
+			function closeAlert() {
+				document.getElementById("custom-alert").classList.add("hide");
+			}
+
+			function openLetterDetails(letter) {
+				const cloudKey = `${currentLevelMode}_letters_${letter}`;
+				openGeneralDetails(cloudKey, `حرف (${letter})`);
+			}
+
+			function openGeneralDetails(id, defaultTitle) {
+				const data = cloudData[id];
+				document.getElementById("modal-letter-title").innerText = data ? data.title : defaultTitle;
+
+				const videoSection = document.getElementById("modal-video-section");
+				const videoWrapper = document.getElementById("modal-video-iframe-wrapper");
+				const pdfSection = document.getElementById("modal-pdf-section");
+				const emptySection = document.getElementById("modal-empty-section");
+
+				if (data) {
+					emptySection.classList.add("hide");
+
+					if (data.mediaUrl) {
+						let embedUrl = data.mediaUrl;
+						if (embedUrl.includes("youtube.com/watch?v=")) {
+							embedUrl = embedUrl.replace("watch?v=", "embed/");
+						} else if (embedUrl.includes("youtu.be/")) {
+							const id = embedUrl.split("/").pop();
+							embedUrl = `https://www.youtube.com/embed/${id}`;
+						}
+						videoWrapper.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+						videoSection.classList.remove("hide");
+					} else {
+						videoSection.classList.add("hide");
+						videoWrapper.innerHTML = "";
+					}
+
+					if (data.pdfUrl) {
+						document.getElementById("modal-pdf-btn").href = data.pdfUrl;
+						pdfSection.classList.remove("hide");
+					} else {
+						pdfSection.classList.add("hide");
+					}
+
+					confetti({ particleCount: 100, spread: 60, origin: { y: 0.8 } });
+				} else {
+					videoSection.classList.add("hide");
+					videoWrapper.innerHTML = "";
+					pdfSection.classList.add("hide");
+					emptySection.classList.remove("hide");
+				}
+
+				document.getElementById("child-modal").classList.remove("hide");
+			}
+
+			function closeChildModal() {
+				document.getElementById("modal-video-iframe-wrapper").innerHTML = "";
+				document.getElementById("child-modal").classList.add("hide");
+			}
+
+			function nav(id) {
+				document.querySelectorAll("body > div[id]").forEach((d) => d.classList.add("hide"));
+				document.getElementById(id).classList.remove("hide");
+				document.body.style.overflowY = id === "home" || id === "admin-screen" ? "auto" : "hidden";
+			}
+
+			function showDash(title, mode) {
+				document.getElementById("lvl-name").innerText = title;
+				currentLevelMode = mode;
+				nav("dash");
+			}
+
+			function refreshActivityContent() {
+				const body = document.getElementById("act-body");
+				const vbtn = document.getElementById("v-btn");
+
+				const matchingItems = Object.values(cloudData).filter((item) => item.level === currentLevelMode && item.category === currentActivityMode);
+
+				if (currentActivityMode === "letters") {
+					document.getElementById("act-title").innerText = "ألبوم الحروف";
+					body.innerHTML = "";
+
+					if (currentLevelMode === "kg1") {
+						ALPHA.forEach((l) => {
+							body.innerHTML += `
+                            <div class="flower" id="letter-wrapper-${l}" onclick="openLetterDetails('${l}')">
+                                <div class="petal" style="--pc:#ff9ff3; transform:rotate(0deg)"></div>
+                                <div class="petal" style="--pc:#feca57; transform:rotate(72deg)"></div>
+                                <div class="petal" style="--pc:#ff6b6b; transform:rotate(144deg)"></div>
+                                <div class="petal" style="--pc:#48dbfb; transform:rotate(216deg)"></div>
+                                <div class="petal" style="--pc:#1dd1a1; transform:rotate(288deg)"></div>
+                                <div class="flower-center">${l}</div>
+                            </div>`;
+						});
+					} else if (currentLevelMode === "kg2") {
+						body.classList.add("space-bg");
+						body.innerHTML = `<div class="rocket-anim">🚀</div>`;
+						const configs = [
+							{ p: "#ff4d4d", r: "#ff7675", g: "#ff1a1a" },
+							{ p: "#4d94ff", r: "#74b9ff", g: "#1a75ff" },
+							{ p: "#4dff88", r: "#55efc4", g: "#00e64d" },
+							{ p: "#ffdb4d", r: "#ffeaa7", g: "#ffcc00" },
+						];
+						ALPHA.forEach((l, i) => {
+							const conf = configs[i % configs.length];
+							body.innerHTML += `
+                            <div class="planet-container" id="letter-wrapper-${l}" onclick="openLetterDetails('${l}')">
+                                <div class="ring" style="--rc:${conf.r}"></div>
+                                <div class="planet" style="--c1:${conf.p}; --glow:${conf.g}">${l}</div>
+                            </div>`;
+						});
+					} else {
+						const colors = ["#FF4757", "#2ED573", "#1E90FF", "#FFA502", "#FF6B81"];
+						ALPHA.forEach((l, i) => {
+							body.innerHTML += `
+                            <div class="balloon" id="letter-wrapper-${l}" style="--bc:${colors[i % 5]}" onclick="openLetterDetails('${l}')">
+                                ${l}
+                            </div>`;
+						});
+					}
+
+					updateActiveAlphabetVisuals();
+				} else if (currentActivityMode === "draw") {
+					document.getElementById("act-title").innerText = "ارسم ولون";
+					vbtn.classList.remove("hide");
+					body.innerHTML = `<div class="w-full max-w-md p-4"><div class="scroll-x flex gap-4 mb-4 p-4 bg-white rounded-3xl shadow-inner">${ALPHA.map((l) => `<button onclick="setChar('${l}')" class="letter-nav-btn">${l}</button>`).join("")}</div><div class="drawing-zone"><div id="char-shadow">أ</div><canvas id="mainCvs"></canvas></div><button onclick="clearCanvas()" class="w-full mt-6 bg-indigo-950 text-white py-5 rounded-3xl font-black text-2xl shadow-[0_5px_0_#000]">مسح اللوحة 🗑️</button></div>`;
+					setTimeout(initCvs, 100);
+				} else {
+					const titles = { stories: "القصص السحابية 📖", play: "ألعاب تفاعلية 🎮", pdf: "ملفات الطباعة 📄" };
+					document.getElementById("act-title").innerText = titles[currentActivityMode];
+
+					body.innerHTML = "";
+
+					if (matchingItems.length === 0) {
+						body.innerHTML = `
+                        <div class="text-center w-full mt-24 px-6 text-gray-500">
+                            <div class="text-8xl mb-4">✨</div>
+                            <h2 class="text-2xl font-black text-indigo-950">مفاجأة قريباً!</h2>
+                            <p class="text-sm text-gray-400 mt-2">معلمتي تحضر لي ألعاباً وملفات رائعة في هذا القسم.</p>
+                        </div>`;
+					} else {
+						matchingItems.forEach((item) => {
+							const card = document.createElement("div");
+							card.className = "content-card";
+							card.onclick = () => openGeneralDetails(item.id, item.title);
+
+							let icon = "🎮";
+							if (currentActivityMode === "stories") icon = "📖";
+							if (currentActivityMode === "pdf") icon = "📄";
+
+							card.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <span class="text-4xl">${icon}</span>
+                                <div>
+                                    <h4 class="font-black text-lg text-indigo-950">${item.title}</h4>
+                                    <p class="text-xs text-gray-400 mt-1">${item.pdfUrl ? "يحتوي على ورقة عمل للطباعة 🖨️" : "محتوى تفاعلي مميز ✨"}</p>
+                                </div>
+                            </div>
+                        `;
+							body.appendChild(card);
+						});
+					}
+				}
+			}
+
+			function openAct(mode) {
+				currentActivityMode = mode;
+				nav("act");
+				refreshActivityContent();
+			}
+
+			function initCvs() {
+				canvas = document.getElementById("mainCvs");
+				ctx = canvas.getContext("2d");
+				const rect = canvas.parentNode.getBoundingClientRect();
+				canvas.width = rect.width;
+				canvas.height = rect.height;
+				ctx.lineWidth = 35;
+				ctx.lineCap = "round";
+				ctx.strokeStyle = "#3b82f6";
+				const getXY = (e) => {
+					const r = canvas.getBoundingClientRect();
+					const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+					const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+					return { x, y };
+				};
+				const start = (e) => {
+					drawing = true;
+					ctx.beginPath();
+					const p = getXY(e);
+					ctx.moveTo(p.x, p.y);
+					if (e.cancelable) e.preventDefault();
+				};
+				const move = (e) => {
+					if (!drawing) return;
+					const p = getXY(e);
+					ctx.lineTo(p.x, p.y);
+					ctx.stroke();
+					if (e.cancelable) e.preventDefault();
+				};
+				canvas.addEventListener("touchstart", start, { passive: false });
+				canvas.addEventListener("touchmove", move, { passive: false });
+				window.addEventListener("touchend", () => (drawing = false));
+				canvas.addEventListener("mousedown", start);
+				canvas.addEventListener("mousemove", move);
+				window.addEventListener("mouseup", () => (drawing = false));
+			}
+			function setChar(l) {
+				document.getElementById("char-shadow").innerText = l;
+				clearCanvas();
+			}
+			function clearCanvas() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+			}
+			function checkWork() {
+				confetti({ particleCount: 200, spread: 80, origin: { y: 0.8 } });
+			}
+
+			window.onload = function () {
+				initCloudApp();
+			};
+		</script>
+	</body>
+</html>
