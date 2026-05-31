@@ -119,7 +119,7 @@ function listenToCloudData() {
 						if (loadedCollections === totalCollections) {
 							console.log("✓ All collections loaded");
 							updateActiveAlphabetVisuals();
-							updateAdminList();
+							updateFilteredAdminList();
 							if (document.getElementById("act").classList.contains("hide") === false) {
 								refreshActivityContent();
 							}
@@ -159,7 +159,7 @@ function fallbackToLocalStorage() {
 	}
 
 	updateActiveAlphabetVisuals();
-	updateAdminList();
+	updateFilteredAdminList();
 	if (document.getElementById("act").classList.contains("hide") === false) {
 		refreshActivityContent();
 	}
@@ -180,68 +180,117 @@ function closeLockModal() {
 	document.getElementById("lock-modal").classList.add("hide");
 }
 
+function setButtonLoading(button, isLoading, originalText = null) {
+	if (isLoading) {
+		button.classList.add("button-loading");
+		button.disabled = true;
+		button.dataset.originalText = originalText || button.innerText;
+		button.innerText = "جاري...";
+	} else {
+		button.classList.remove("button-loading");
+		button.disabled = false;
+		button.innerText = button.dataset.originalText || "حفظ ونشر فوراً 🚀";
+	}
+}
+
 async function loginAdmin() {
 	const email = document.getElementById("admin-email").value.trim();
 	const password = document.getElementById("admin-password").value;
+	const loginBtn = document.querySelector("#lock-modal button[onclick='loginAdmin()']");
 
 	if (!email || !password) {
 		showCustomAlert("⚠️", "يرجى كتابة البريد الإلكتروني وكلمة السر!");
 		return;
 	}
 
-	if (isCloudMode && auth) {
-		try {
-			await auth.signInWithEmailAndPassword(email, password);
-			closeLockModal();
-			nav("admin-screen");
-		} catch (err) {
-			if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
-				try {
-					await auth.createUserWithEmailAndPassword(email, password);
-					closeLockModal();
-					nav("admin-screen");
-					showCustomAlert("👑", "أهلاً بكِ معلمتنا العبقرية! تم إنشاء حسابكِ السحابي المؤمن بنجاح.");
-				} catch (signupErr) {
-					showCustomAlert("❌", "خطأ في تسجيل الدخول أو الرمز خاطئ.");
+	try {
+		if (loginBtn) setButtonLoading(loginBtn, true, "تسجيل دخول 🔑");
+
+		if (isCloudMode && auth) {
+			try {
+				await auth.signInWithEmailAndPassword(email, password);
+				closeLockModal();
+				nav("admin-screen");
+			} catch (err) {
+				if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+					try {
+						await auth.createUserWithEmailAndPassword(email, password);
+						closeLockModal();
+						nav("admin-screen");
+						showCustomAlert("👑", "أهلاً بكِ معلمتنا العبقرية! تم إنشاء حسابكِ السحابي المؤمن بنجاح.");
+					} catch (signupErr) {
+						showCustomAlert("❌", "خطأ في تسجيل الدخول أو الرمز خاطئ.");
+					}
+				} else {
+					showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
 				}
+			}
+		} else {
+			if (password === "2026") {
+				closeLockModal();
+				nav("admin-screen");
 			} else {
-				showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
+				showCustomAlert("❌", "رمز المرور غير صحيح!");
 			}
 		}
-	} else {
-		if (password === "2026") {
-			closeLockModal();
-			nav("admin-screen");
-		} else {
-			showCustomAlert("❌", "رمز المرور غير صحيح!");
-		}
+	} finally {
+		if (loginBtn) setButtonLoading(loginBtn, false);
 	}
 }
 
 async function logoutAdmin() {
-	if (isCloudMode && auth) {
-		try {
-			await auth.signOut();
-			await auth.signInAnonymously();
-		} catch (e) {}
+	const logoutBtn = document.querySelector("button[onclick='logoutAdmin()']");
+	try {
+		if (logoutBtn) setButtonLoading(logoutBtn, true, "تسجيل خروج 🚪");
+
+		if (isCloudMode && auth) {
+			try {
+				await auth.signOut();
+				await auth.signInAnonymously();
+			} catch (e) {}
+		}
+		nav("home");
+		showCustomAlert("🚪", "تم تسجيل خروجكِ بأمان من الإدارة.");
+	} finally {
+		if (logoutBtn) setButtonLoading(logoutBtn, false);
 	}
-	nav("home");
-	showCustomAlert("🚪", "تم تسجيل خروجكِ بأمان من الإدارة.");
 }
 
 function toggleLetterField() {
 	const cat = document.getElementById("admin-category-select").value;
 	const letterField = document.getElementById("admin-letter-field");
 	const titleField = document.getElementById("admin-title-field");
+	const mediaField = document.getElementById("admin-media-field");
+	const pdfField = document.getElementById("admin-pdf-field");
+
+	// Reset all fields
+	letterField.classList.add("hide");
+	titleField.classList.add("hide");
+	mediaField.classList.add("hide");
+	pdfField.classList.add("hide");
+	document.getElementById("admin-content-title").required = false;
+	document.getElementById("admin-media-url").required = false;
+	document.getElementById("admin-pdf-url").required = false;
 
 	if (cat === "letters") {
 		letterField.classList.remove("hide");
-		titleField.classList.add("hide");
-		document.getElementById("admin-content-title").required = false;
-	} else {
-		letterField.classList.add("hide");
+	} else if (cat === "stories") {
 		titleField.classList.remove("hide");
+		mediaField.classList.remove("hide");
 		document.getElementById("admin-content-title").required = true;
+		document.getElementById("admin-media-url").required = true;
+	} else if (cat === "play") {
+		titleField.classList.remove("hide");
+		mediaField.classList.remove("hide");
+		pdfField.classList.remove("hide");
+		document.getElementById("admin-content-title").required = true;
+		document.getElementById("admin-media-url").required = true;
+		document.getElementById("admin-pdf-url").required = true;
+	} else if (cat === "pdf") {
+		titleField.classList.remove("hide");
+		pdfField.classList.remove("hide");
+		document.getElementById("admin-content-title").required = true;
+		document.getElementById("admin-pdf-url").required = true;
 	}
 }
 
@@ -278,7 +327,7 @@ function updateActiveAlphabetVisuals() {
 	});
 }
 
-function updateAdminList() {
+function updateAdminList(filterLevel = null, filterCategory = null) {
 	const container = document.getElementById("active-letters-list");
 	container.innerHTML = "";
 
@@ -306,12 +355,22 @@ function updateAdminList() {
 		}
 	});
 
-	if (allItems.length === 0) {
+	// Filter items if parameters provided
+	let filteredItems = allItems;
+	if (filterLevel || filterCategory) {
+		filteredItems = allItems.filter((item) => {
+			if (filterLevel && item.level !== filterLevel) return false;
+			if (filterCategory && item.category !== filterCategory) return false;
+			return true;
+		});
+	}
+
+	if (filteredItems.length === 0) {
 		container.innerHTML = `<p class="text-xs text-gray-400 text-center">لا توجد محتويات مضافة حالياً.</p>`;
 		return;
 	}
 
-	allItems.forEach(({ level, category, docId, item }) => {
+	filteredItems.forEach(({ level, category, docId, item }) => {
 		const row = document.createElement("div");
 		row.className = "p-3 bg-white rounded-2xl border text-sm space-y-1 relative";
 
@@ -319,13 +378,35 @@ function updateAdminList() {
 		const catDisplay = catNames[category] || category;
 		const targetDisplay = category === "letters" ? `حرف (${docId})` : item.title || docId;
 
+		const deleteBtn = document.createElement("button");
+		deleteBtn.className = "absolute top-2 left-2 bg-red-100 text-red-600 px-3 py-1 rounded-xl text-xs font-bold active:scale-95";
+		deleteBtn.innerText = "حذف 🗑️";
+		deleteBtn.onclick = function () {
+			deleteContentCloud("${level}", "${category}", "${docId}", this);
+		};
+
 		row.innerHTML = `
                     <div class="font-bold text-gray-800 text-sm">📍 ${levelDisplay} ⬅️ ${catDisplay}</div>
                     <div class="text-indigo-600 font-bold text-xs">🎯 : ${targetDisplay}</div>
-                    <button onclick="deleteContentCloud('${level}', '${category}', '${docId}')" class="absolute top-2 left-2 bg-red-100 text-red-600 px-3 py-1 rounded-xl text-xs font-bold active:scale-95">حذف 🗑️</button>
                 `;
+		row.appendChild(deleteBtn);
 		container.appendChild(row);
 	});
+}
+
+function updateFilteredAdminList() {
+	const level = document.getElementById("admin-level-select").value;
+	const category = document.getElementById("admin-category-select").value;
+
+	const levelNames = { step: "خطواتي الأولى", kg1: "KG1", kg2: "KG2" };
+	const catNames = { letters: "ألبوم الحروف", stories: "القصص", play: "هيا نلعب", pdf: "ملفات الطباعة" };
+
+	// Update filter display labels
+	document.getElementById("filter-level-display").innerText = levelNames[level] || level;
+	document.getElementById("filter-category-display").innerText = catNames[category] || category;
+
+	// Update the list with filters
+	updateAdminList(level, category);
 }
 
 function buildLetterPayload(data) {
@@ -378,43 +459,62 @@ function buildCollectionPayload(category, data) {
 
 document.getElementById("admin-form").addEventListener("submit", async (e) => {
 	e.preventDefault();
-	const level = document.getElementById("admin-level-select").value;
-	const category = document.getElementById("admin-category-select").value;
-	const letter = document.getElementById("admin-letter-select").value;
-	const title = document.getElementById("admin-content-title").value;
-	const mediaUrl = document.getElementById("admin-media-url").value;
-	const pdfUrl = document.getElementById("admin-pdf-url").value;
 
-	// Document ID: letter name for letters category, timestamp for others
-	let documentId = "";
-	if (category === "letters") {
-		documentId = letter; // Use letter as document ID: ا, ب, etc.
-	} else {
-		documentId = `${Date.now()}`; // Use timestamp for unique IDs
-	}
+	const submitBtn = e.target.querySelector("button[type='submit']");
+	const originalBtnText = submitBtn.innerText;
 
-	const payload = buildCollectionPayload(category, { letter, title, mediaUrl, pdfUrl });
+	// Show loading state
+	submitBtn.classList.add("button-loading");
+	submitBtn.disabled = true;
+	submitBtn.innerText = "جاري الحفظ...";
 
-	const collectionPath = getCollectionPath(level, category);
-	console.log(`Saving to: ${collectionPath}/${documentId}`);
+	try {
+		const level = document.getElementById("admin-level-select").value;
+		const category = document.getElementById("admin-category-select").value;
+		const letter = document.getElementById("admin-letter-select").value;
+		const title = document.getElementById("admin-content-title").value;
+		const mediaUrl = document.getElementById("admin-media-url").value;
+		const pdfUrl = document.getElementById("admin-pdf-url").value;
 
-	if (isCloudMode && db) {
-		try {
-			await db.collection(collectionPath).doc(documentId).set(payload);
-			showCustomAlert("🌟", "تم الحفظ والنشر بنجاح سحابياً!");
-		} catch (err) {
-			console.error("Cloud save failed:", err);
-			saveToLocalStore(level, category, documentId, payload);
-			showCustomAlert("💾", "تم تفعيل وضع حفظ الموبايل الداخلي بنجاح!");
+		// Document ID: letter name for letters category, timestamp for others
+		let documentId = "";
+		if (category === "letters") {
+			documentId = letter; // Use letter as document ID: ا, ب, etc.
+		} else {
+			documentId = `${Date.now()}`; // Use timestamp for unique IDs
 		}
-	} else {
-		saveToLocalStore(level, category, documentId, payload);
-		showCustomAlert("💾", "تم حفظ وتحديث المحتوى بنجاح داخل هاتفك!");
-	}
 
-	document.getElementById("admin-form").reset();
-	toggleLetterField();
-	confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+		const payload = buildCollectionPayload(category, { letter, title, mediaUrl, pdfUrl });
+
+		const collectionPath = getCollectionPath(level, category);
+		console.log(`Saving to: ${collectionPath}/${documentId}`);
+
+		if (isCloudMode && db) {
+			try {
+				await db.collection(collectionPath).doc(documentId).set(payload);
+				showCustomAlert("🌟", "تم الحفظ والنشر بنجاح سحابياً!");
+			} catch (err) {
+				console.error("Cloud save failed:", err);
+				saveToLocalStore(level, category, documentId, payload);
+				showCustomAlert("💾", "تم تفعيل وضع حفظ الموبايل الداخلي بنجاح!");
+			}
+		} else {
+			saveToLocalStore(level, category, documentId, payload);
+			showCustomAlert("💾", "تم حفظ وتحديث المحتوى بنجاح داخل هاتفك!");
+		}
+
+		document.getElementById("admin-form").reset();
+		toggleLetterField();
+		confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+	} catch (error) {
+		console.error("Form submission error:", error);
+		showCustomAlert("❌", "حدث خطأ أثناء الحفظ، يرجى المحاولة مجدداً.");
+	} finally {
+		// Remove loading state
+		submitBtn.classList.remove("button-loading");
+		submitBtn.disabled = false;
+		submitBtn.innerText = originalBtnText;
+	}
 });
 
 function saveToLocalStore(level, category, documentId, data) {
@@ -425,28 +525,34 @@ function saveToLocalStore(level, category, documentId, data) {
 	cloudData[level][category][documentId] = data;
 	localStorage.setItem("genius_kids_v3_local_data", JSON.stringify(cloudData));
 	updateActiveAlphabetVisuals();
-	updateAdminList();
+	updateFilteredAdminList();
 	if (!document.getElementById("act").classList.contains("hide")) {
 		refreshActivityContent();
 	}
 }
 
-async function deleteContentCloud(level, category, documentId) {
+async function deleteContentCloud(level, category, documentId, deleteBtn) {
 	if (confirm("هل تريدين حذف هذا المحتوى نهائياً؟")) {
-		const collectionPath = getCollectionPath(level, category);
-		console.log(`Deleting from: ${collectionPath}/${documentId}`);
+		try {
+			if (deleteBtn) setButtonLoading(deleteBtn, true, "حذف 🗑️");
 
-		if (isCloudMode && db) {
-			try {
-				await db.collection(collectionPath).doc(documentId).delete();
-				showCustomAlert("🗑️", "تم الحذف بنجاح.");
-			} catch (err) {
-				console.error("Cloud delete failed:", err);
+			const collectionPath = getCollectionPath(level, category);
+			console.log(`Deleting from: ${collectionPath}/${documentId}`);
+
+			if (isCloudMode && db) {
+				try {
+					await db.collection(collectionPath).doc(documentId).delete();
+					showCustomAlert("🗑️", "تم الحذف بنجاح.");
+				} catch (err) {
+					console.error("Cloud delete failed:", err);
+					deleteFromLocalStore(level, category, documentId);
+				}
+			} else {
 				deleteFromLocalStore(level, category, documentId);
+				showCustomAlert("🗑️", "تم مسح المحتوى تماماً من موبايلك.");
 			}
-		} else {
-			deleteFromLocalStore(level, category, documentId);
-			showCustomAlert("🗑️", "تم مسح المحتوى تماماً من موبايلك.");
+		} finally {
+			if (deleteBtn) setButtonLoading(deleteBtn, false);
 		}
 	}
 }
@@ -456,7 +562,7 @@ function deleteFromLocalStore(level, category, documentId) {
 		delete cloudData[level][category][documentId];
 		localStorage.setItem("genius_kids_v3_local_data", JSON.stringify(cloudData));
 		updateActiveAlphabetVisuals();
-		updateAdminList();
+		updateFilteredAdminList();
 		if (!document.getElementById("act").classList.contains("hide")) {
 			refreshActivityContent();
 		}
@@ -496,19 +602,32 @@ function openGeneralDetails(data, defaultTitle) {
 			let embedUrl = data.mediaUrl;
 			let videoId = null;
 
-			// Extract video ID from youtube.com/watch?v=VIDEO_ID (handles extra params like &source_ve_path=)
-			if (embedUrl.includes("youtube.com/watch")) {
+			// Handle Google Drive videos
+			if (embedUrl.includes("drive.google.com")) {
+				// Extract file ID from drive.google.com/file/d/{FILE_ID}/view
+				const match = embedUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+				if (match) {
+					const fileId = match[1];
+					embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+				}
+			}
+			// Handle YouTube videos
+			else if (embedUrl.includes("youtube.com/watch")) {
+				// Extract video ID from youtube.com/watch?v=VIDEO_ID (handles extra params like &source_ve_path=)
 				const match = embedUrl.match(/[?&]v=([a-zA-Z0-9_-]+)/);
 				if (match) videoId = match[1];
+				if (videoId) {
+					embedUrl = `https://www.youtube.com/embed/${videoId}`;
+				}
 			}
-			// Extract video ID from youtu.be/VIDEO_ID (handles extra params)
+			// Handle youtu.be shortened YouTube links
 			else if (embedUrl.includes("youtu.be/")) {
+				// Extract video ID from youtu.be/VIDEO_ID (handles extra params)
 				const match = embedUrl.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
 				if (match) videoId = match[1];
-			}
-
-			if (videoId) {
-				embedUrl = `https://www.youtube.com/embed/${videoId}`;
+				if (videoId) {
+					embedUrl = `https://www.youtube.com/embed/${videoId}`;
+				}
 			}
 
 			videoWrapper.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
