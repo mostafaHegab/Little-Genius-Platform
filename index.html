@@ -173,23 +173,26 @@
 
 					<!-- 4. عنوان المحتوى (يظهر فقط للألعاب والقصص والـ pdf) -->
 					<div id="admin-title-field" class="hide">
-						<label class="block text-xs font-bold mb-1 text-gray-600">عنوان:</label>
-						<input type="text" id="admin-content-title" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="مثال: قصة الصدق منجاة أو لعبة التوصيل" />
+						<label id="admin-title-label" class="block text-xs font-bold mb-1 text-gray-600">عنوان:</label>
+						<input type="text" id="admin-content-title" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="" />
 					</div>
 
 					<!-- 5. الروابط -->
 					<div id="admin-media-field">
-						<label class="block text-xs font-bold mb-1 text-gray-600">رابط الفيديو (YouTube/Google Drive):</label>
+						<label id="admin-media-label" class="block text-xs font-bold mb-1 text-gray-600">رابط Google Drive:</label>
 						<input
 							type="url"
 							id="admin-media-url"
 							class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm"
-							placeholder="https://youtube.com/watch?v=... أو https://drive.google.com/file/d/.../view"
+							placeholder="https://drive.google.com/file/d/FILE_ID/view"
 						/>
+						<p id="admin-media-hint" class="text-xs text-gray-500 mt-1">⚠️ يجب أن يكون رابط Google Drive صحيح (مثال: drive.google.com/file/d/...)</p>
 					</div>
 
 					<div id="admin-pdf-field">
-						<input type="url" id="admin-pdf-url" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="https://drive.google.com/..." />
+						<label id="admin-pdf-label" class="block text-xs font-bold mb-1 text-gray-600">رابط ملف PDF (Google Drive):</label>
+						<input type="url" id="admin-pdf-url" class="w-full p-3 rounded-2xl border-2 border-gray-200 outline-none text-sm" placeholder="https://drive.google.com/file/d/FILE_ID/view" />
+						<p class="text-xs text-gray-500 mt-1">⚠️ يجب أن يكون رابط Google Drive صحيح</p>
 					</div>
 
 					<button type="submit" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95">حفظ ونشر فوراً 🚀</button>
@@ -212,22 +215,22 @@
 					<button onclick="closeChildModal()" class="bg-red-500 text-white font-black px-4 py-2 rounded-full text-sm active:scale-90">إغلاق ❌</button>
 				</div>
 
-				<div class="flex-1 overflow-y-auto p-6 space-y-6">
+				<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
 					<!-- مشغل الفيديوهات والألعاب التفاعلية -->
-					<div id="modal-video-section" class="hide">
+					<div id="modal-video-section" class="hide flex-1 flex flex-col">
 						<p class="font-bold text-indigo-900 mb-2">📺 العب وشاهد مع البطل:</p>
-						<div class="video-wrapper" id="modal-video-iframe-wrapper"></div>
+						<div class="video-wrapper flex-1" id="modal-video-iframe-wrapper"></div>
 					</div>
 
 					<!-- زر تحميل الـ PDF -->
-					<div id="modal-pdf-section" class="hide bg-green-50 p-6 rounded-3xl border-2 border-green-200 text-center">
+					<div id="modal-pdf-section" class="hide bg-green-50 p-6 rounded-3xl border-2 border-green-200 text-center flex flex-col items-center justify-center">
 						<span class="text-4xl block mb-2">📝</span>
 						<h4 class="font-bold text-green-950 mb-3">جاهز للتحميل والطباعة!</h4>
 						<a id="modal-pdf-btn" href="#" target="_blank" class="inline-block bg-green-500 text-white px-8 py-3 rounded-2xl font-bold shadow-md active:scale-95">تحميل الملف 🖨️</a>
 					</div>
 
 					<!-- رسالة في حال عدم وجود محتوى مضاف بعد -->
-					<div id="modal-empty-section" class="text-center py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+					<div id="modal-empty-section" class="text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center">
 						<span class="text-5xl block mb-4">🎈</span>
 						<p class="font-black text-gray-600 text-lg">مفاجأة قريبة جداً!</p>
 						<p class="text-sm text-gray-400 mt-1">معلمتي تحضر لي ألعاباً وأوراق تلوين رائعة في هذا القسم.</p>

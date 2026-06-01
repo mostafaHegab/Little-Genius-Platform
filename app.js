@@ -273,24 +273,99 @@ function toggleLetterField() {
 	document.getElementById("admin-pdf-url").required = false;
 
 	if (cat === "letters") {
+		// Letters: letter select, video URL, and PDF URL
 		letterField.classList.remove("hide");
+		mediaField.classList.remove("hide");
+		pdfField.classList.remove("hide");
+		document.getElementById("admin-media-url").required = true;
+		document.getElementById("admin-pdf-url").required = true;
+		updateDynamicLabels("letters");
 	} else if (cat === "stories") {
+		// Stories: title and media link
 		titleField.classList.remove("hide");
 		mediaField.classList.remove("hide");
 		document.getElementById("admin-content-title").required = true;
 		document.getElementById("admin-media-url").required = true;
+		updateDynamicLabels("stories");
 	} else if (cat === "play") {
+		// Play: title and URL
 		titleField.classList.remove("hide");
 		mediaField.classList.remove("hide");
-		pdfField.classList.remove("hide");
 		document.getElementById("admin-content-title").required = true;
 		document.getElementById("admin-media-url").required = true;
-		document.getElementById("admin-pdf-url").required = true;
+		updateDynamicLabels("play");
 	} else if (cat === "pdf") {
+		// PDF: title and PDF link
 		titleField.classList.remove("hide");
 		pdfField.classList.remove("hide");
 		document.getElementById("admin-content-title").required = true;
 		document.getElementById("admin-pdf-url").required = true;
+		updateDynamicLabels("pdf");
+	}
+}
+
+/**
+ * Update form labels and placeholders dynamically based on category
+ */
+function updateDynamicLabels(category) {
+	const titleLabel = document.getElementById("admin-title-label");
+	const titleInput = document.getElementById("admin-content-title");
+	const mediaLabel = document.getElementById("admin-media-label");
+	const mediaInput = document.getElementById("admin-media-url");
+	const pdfLabel = document.getElementById("admin-pdf-label");
+	const pdfInput = document.getElementById("admin-pdf-url");
+
+	const labelTexts = {
+		letters: {
+			media: "رابط فيديو الحرف (Google Drive):",
+			pdf: "رابط ملف PDF للحرف (Google Drive):",
+			mediaHint: "⚠️ يجب أن يكون رابط Google Drive صحيح (مثال: drive.google.com/file/d/...)",
+		},
+		stories: {
+			title: "عنوان القصة:",
+			media: "رابط القصة أو الفيديو (Google Drive):",
+			titlePlaceholder: "مثال: قصة الصدق منجاة",
+			mediaPlaceholder: "رابط فيديو القصة",
+			mediaHint: "⚠️ يجب أن يكون رابط Google Drive صحيح (مثال: drive.google.com/file/d/...)",
+		},
+		play: {
+			title: "عنوان اللعبة:",
+			media: "رابط اللعبة التفاعلية (أي رابط):",
+			titlePlaceholder: "مثال: لعبة التوصيل",
+			mediaPlaceholder: "https://example.com/game أو أي رابط",
+			mediaHint: "✅ يمكنك إضافة أي رابط (موقع ويب، تطبيق، إلخ)",
+		},
+		pdf: {
+			title: "عنوان الملف:",
+			pdf: "رابط ملف PDF (Google Drive):",
+			titlePlaceholder: "مثال: أوراق تلوين الحروف",
+			pdfPlaceholder: "رابط ملف PDF",
+		},
+	};
+
+	const config = labelTexts[category];
+
+	if (config.title) {
+		titleLabel.innerText = config.title;
+	}
+	if (config.titlePlaceholder) {
+		titleInput.placeholder = config.titlePlaceholder;
+	}
+	if (config.media) {
+		mediaLabel.innerText = config.media;
+	}
+	if (config.mediaPlaceholder) {
+		mediaInput.placeholder = config.mediaPlaceholder;
+	}
+	if (config.pdf) {
+		pdfLabel.innerText = config.pdf;
+	}
+	if (config.pdfPlaceholder) {
+		pdfInput.placeholder = config.pdfPlaceholder;
+	}
+	if (config.mediaHint) {
+		const mediaHint = document.getElementById("admin-media-hint");
+		mediaHint.innerText = config.mediaHint;
 	}
 }
 
@@ -454,6 +529,25 @@ function buildCollectionPayload(category, data) {
 	return builders[category] ? builders[category](data) : {};
 }
 
+/**
+ * Validate if a URL is a valid Google Drive link
+ * Accepts formats:
+ * - https://drive.google.com/file/d/{FILE_ID}/view
+ * - https://drive.google.com/open?id={FILE_ID}
+ */
+function isValidGoogleDriveLink(url) {
+	if (!url) return false;
+	try {
+		const urlObj = new URL(url);
+		// Check if it's a Google Drive URL
+		if (!urlObj.hostname.includes("drive.google.com")) return false;
+		// Check if it has either the file/d/ pattern or open?id= pattern
+		return /\/d\/[a-zA-Z0-9-_]+/.test(url) || /id=[a-zA-Z0-9-_]+/.test(url);
+	} catch (e) {
+		return false;
+	}
+}
+
 document.getElementById("admin-form").addEventListener("submit", async (e) => {
 	e.preventDefault();
 
@@ -472,6 +566,19 @@ document.getElementById("admin-form").addEventListener("submit", async (e) => {
 		const title = document.getElementById("admin-content-title").value;
 		const mediaUrl = document.getElementById("admin-media-url").value;
 		const pdfUrl = document.getElementById("admin-pdf-url").value;
+
+		// Validate Google Drive links if they are present
+		// For play category, allow any link. For others, enforce Google Drive
+		if (mediaUrl) {
+			if (category !== "play" && !isValidGoogleDriveLink(mediaUrl)) {
+				showCustomAlert("⚠️", "رابط Google Drive غير صحيح! يرجى التأكد من أن الرابط يبدأ بـ drive.google.com");
+				return;
+			}
+		}
+		if (pdfUrl && !isValidGoogleDriveLink(pdfUrl)) {
+			showCustomAlert("⚠️", "رابط ملف PDF غير صحيح! يرجى التأكد من أن الرابط يبدأ بـ drive.google.com");
+			return;
+		}
 
 		// Document ID: letter name for letters category, timestamp for others
 		let documentId = "";
@@ -595,40 +702,24 @@ function openGeneralDetails(data, defaultTitle) {
 	if (data) {
 		emptySection.classList.add("hide");
 
+		console.log("🚀 ~ openGeneralDetails ~ mediaUrl:", data.mediaUrl);
 		if (data.mediaUrl) {
-			let embedUrl = data.mediaUrl;
-			let videoId = null;
-
-			// Handle Google Drive videos
-			if (embedUrl.includes("drive.google.com")) {
+			// For Google Drive links, try to embed as video
+			if (data.mediaUrl.includes("drive.google.com")) {
 				// Extract file ID from drive.google.com/file/d/{FILE_ID}/view
-				const match = embedUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+				const match = data.mediaUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
 				if (match) {
 					const fileId = match[1];
-					embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-				}
-			}
-			// Handle YouTube videos
-			else if (embedUrl.includes("youtube.com/watch")) {
-				// Extract video ID from youtube.com/watch?v=VIDEO_ID (handles extra params like &source_ve_path=)
-				const match = embedUrl.match(/[?&]v=([a-zA-Z0-9_-]+)/);
-				if (match) videoId = match[1];
-				if (videoId) {
-					embedUrl = `https://www.youtube.com/embed/${videoId}`;
-				}
-			}
-			// Handle youtu.be shortened YouTube links
-			else if (embedUrl.includes("youtu.be/")) {
-				// Extract video ID from youtu.be/VIDEO_ID (handles extra params)
-				const match = embedUrl.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
-				if (match) videoId = match[1];
-				if (videoId) {
-					embedUrl = `https://www.youtube.com/embed/${videoId}`;
-				}
-			}
+					const viewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-			videoWrapper.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-			videoSection.classList.remove("hide");
+					videoWrapper.innerHTML = `<iframe src="${viewUrl}" width="100%" height="400px" allowfullscreen style="border-radius: 0.5rem;"></iframe>`;
+					videoSection.classList.remove("hide");
+				}
+			} else {
+				// For other URLs, use video tag
+				videoWrapper.innerHTML = `<video width="100%" height="auto" controls style="border-radius: 0.5rem;"><source src="${data.mediaUrl}" type="video/mp4"><p class="text-sm text-gray-600">متصفحك لا يدعم تشغيل الفيديو. يرجى فتح الرابط مباشرة.</p></video>`;
+				videoSection.classList.remove("hide");
+			}
 		} else {
 			videoSection.classList.add("hide");
 			videoWrapper.innerHTML = "";
@@ -641,7 +732,14 @@ function openGeneralDetails(data, defaultTitle) {
 			pdfSection.classList.add("hide");
 		}
 
-		confetti({ particleCount: 100, spread: 60, origin: { y: 0.8 } });
+		// Show confetti, but don't let it block modal display
+		try {
+			if (typeof confetti !== "undefined") {
+				confetti({ particleCount: 100, spread: 60, origin: { y: 0.8 } });
+			}
+		} catch (err) {
+			console.warn("Confetti error:", err);
+		}
 	} else {
 		videoSection.classList.add("hide");
 		videoWrapper.innerHTML = "";
@@ -649,7 +747,13 @@ function openGeneralDetails(data, defaultTitle) {
 		emptySection.classList.remove("hide");
 	}
 
-	document.getElementById("child-modal").classList.remove("hide");
+	// Show modal
+	const modal = document.getElementById("child-modal");
+	if (modal) {
+		modal.classList.remove("hide");
+	} else {
+		console.error("Modal element not found!");
+	}
 }
 
 function closeChildModal() {
