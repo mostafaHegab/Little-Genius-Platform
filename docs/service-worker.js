@@ -1,8 +1,25 @@
 const CACHE_VERSION = "v1";
 const CACHE_NAME = `genius-kids-${CACHE_VERSION}`;
 
-// Assets to cache on install
-const ASSETS_TO_CACHE = ["/", "/index.html", "/app.js", "/styles.css", "/manifest.json"];
+// Determine base path for GitHub Pages or other deployments
+function getBasePath() {
+	const pathname = self.location.pathname;
+	if (pathname.includes("/Little-Genius-Platform/")) {
+		return "/Little-Genius-Platform/";
+	}
+	return "/";
+}
+
+const BASE_PATH = getBasePath();
+
+// Assets to cache on install - using correct paths for deployment
+const ASSETS_TO_CACHE = [
+	BASE_PATH,
+	BASE_PATH + "index.html",
+	BASE_PATH + "app.js",
+	BASE_PATH + "styles.css",
+	BASE_PATH + "manifest.json",
+];
 
 // Install event - cache essential assets
 self.addEventListener("install", (event) => {
