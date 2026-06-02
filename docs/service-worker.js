@@ -13,13 +13,7 @@ function getBasePath() {
 const BASE_PATH = getBasePath();
 
 // Assets to cache on install - using correct paths for deployment
-const ASSETS_TO_CACHE = [
-	BASE_PATH,
-	BASE_PATH + "index.html",
-	BASE_PATH + "app.js",
-	BASE_PATH + "styles.css",
-	BASE_PATH + "manifest.json",
-];
+const ASSETS_TO_CACHE = [BASE_PATH, BASE_PATH + "index.html", BASE_PATH + "app.js", BASE_PATH + "styles.css", BASE_PATH + "manifest.json"];
 
 // Install event - cache essential assets
 self.addEventListener("install", (event) => {
