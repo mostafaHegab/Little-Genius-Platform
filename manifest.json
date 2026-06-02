@@ -10,25 +10,25 @@
 	"theme_color": "#4338ca",
 	"icons": [
 		{
-			"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234338ca' width='192' height='192'/><text x='96' y='120' font-size='100' font-weight='900' text-anchor='middle' fill='%23ffd700' font-family='Arial'>🧠</text></svg>",
+			"src": "icon-192x192.svg",
 			"sizes": "192x192",
 			"type": "image/svg+xml",
 			"purpose": "any"
 		},
 		{
-			"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%234338ca' width='512' height='512'/><text x='256' y='340' font-size='280' font-weight='900' text-anchor='middle' fill='%23ffd700' font-family='Arial'>🧠</text></svg>",
+			"src": "icon-512x512.svg",
 			"sizes": "512x512",
 			"type": "image/svg+xml",
 			"purpose": "any"
 		},
 		{
-			"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234338ca' width='192' height='192' rx='50'/><text x='96' y='120' font-size='100' font-weight='900' text-anchor='middle' fill='%23ffd700' font-family='Arial'>🧠</text></svg>",
+			"src": "icon-192x192.svg",
 			"sizes": "192x192",
 			"type": "image/svg+xml",
 			"purpose": "maskable"
 		},
 		{
-			"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%234338ca' width='512' height='512' rx='130'/><text x='256' y='340' font-size='280' font-weight='900' text-anchor='middle' fill='%23ffd700' font-family='Arial'>🧠</text></svg>",
+			"src": "icon-512x512.svg",
 			"sizes": "512x512",
 			"type": "image/svg+xml",
 			"purpose": "maskable"

@@ -1,3 +1,6 @@
+// PWA Installation management
+let deferredPrompt = null;
+
 // Register service worker for offline support
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
@@ -18,7 +21,9 @@ if ("serviceWorker" in navigator) {
 						if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
 							console.log("🔄 New app version available! Refresh to update.");
 							// Optional: Show user notification about update
-							showCustomAlert("🔄", "تحديث جديد متاح! الرجاء تحديث الصفحة.");
+							if (typeof showCustomAlert === "function") {
+								showCustomAlert("🔄", "تحديث جديد متاح! الرجاء تحديث الصفحة.");
+							}
 						}
 					});
 				});
@@ -37,14 +42,73 @@ if ("serviceWorker" in navigator) {
 	});
 }
 
-// Detect when app is installed
+// Capture install prompt
 window.addEventListener("beforeinstallprompt", (e) => {
-	console.log("💾 App can be installed");
+	console.log("💾 Install prompt triggered!");
 	e.preventDefault();
-	// Store the event for later use
-	window.deferredPrompt = e;
+	deferredPrompt = e;
+
+	// Show install button if available
+	showInstallButton();
 });
 
+// Handle app installation
 window.addEventListener("appinstalled", () => {
 	console.log("✨ App installed successfully!");
+	deferredPrompt = null;
+	hideInstallButton();
+	if (typeof showCustomAlert === "function") {
+		showCustomAlert("✨", "تم تثبيت التطبيق بنجاح! يمكنك الآن استخدامه بدون الإنترنت.");
+	}
 });
+
+// Handle app being used as standalone
+if (window.navigator.standalone === true) {
+	console.log("🎯 App is running in standalone mode");
+}
+
+// Detect if app can be installed
+function canInstallApp() {
+	return deferredPrompt !== null;
+}
+
+// Manually trigger install
+async function installApp() {
+	if (!deferredPrompt) {
+		console.warn("❌ Install prompt not available yet");
+		return;
+	}
+
+	deferredPrompt.prompt();
+	const { outcome } = await deferredPrompt.userChoice;
+	console.log(`User choice: ${outcome}`);
+	deferredPrompt = null;
+	hideInstallButton();
+}
+
+// Show install button
+function showInstallButton() {
+	const installBtn = document.getElementById("pwa-install-btn");
+	if (installBtn) {
+		installBtn.classList.remove("hide");
+		console.log("📦 Install button shown");
+	} else {
+		console.warn("Install button element not found");
+	}
+}
+
+// Hide install button
+function hideInstallButton() {
+	const installBtn = document.getElementById("pwa-install-btn");
+	if (installBtn) {
+		installBtn.classList.add("hide");
+	}
+}
+
+// Log PWA status on startup
+console.log("🔍 PWA Status Check:");
+console.log("  - HTTPS:", window.location.protocol === "https:" ? "✅" : "❌");
+console.log("  - ServiceWorker Support:", "serviceWorker" in navigator ? "✅" : "❌");
+console.log("  - Manifest Link:", document.querySelector('link[rel="manifest"]') ? "✅" : "❌");
+console.log("  - Standalone Mode:", window.navigator.standalone === true ? "✅" : "Not applicable");
+console.log("  - URL:", window.location.href);

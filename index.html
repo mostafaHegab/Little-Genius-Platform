@@ -33,6 +33,16 @@
 				<!-- الضغط على عنوان المنصة يفتح شاشة التحقق السحابية المشفرة -->
 				<h1 class="main-title font-black" onclick="openAdminGate()">منصة العبقري الصغير</h1>
 			</div>
+
+			<!-- PWA Install Button -->
+			<button
+				id="pwa-install-btn"
+				class="hide bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-6 py-3 rounded-2xl font-black text-sm mb-4 shadow-lg hover:shadow-xl transition-all active:scale-95"
+				onclick="installApp()"
+			>
+				📱 تثبيت التطبيق
+			</button>
+
 			<p class="sub-text">هيا نتعلم ونلعب 🌈 🚀</p>
 
 			<div class="card-home bg-[#FF69B4]" onclick="showDash('خطواتي الأولى', 'step')">
