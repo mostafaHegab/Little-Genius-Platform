@@ -1,5 +1,5 @@
 {
-  "appId": "com.little.genius.app",
-  "appName": "little-genius-platform",
-  "webDir": "www"
+	"appId": "com.little.genius.app",
+	"appName": "little-genius-platform",
+	"webDir": "."
 }
