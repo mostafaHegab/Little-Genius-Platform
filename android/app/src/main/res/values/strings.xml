@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">little-genius-platform</string>
+    <string name="title_activity_main">little-genius-platform</string>
+    <string name="package_name">com.little.genius.app</string>
+    <string name="custom_url_scheme">com.little.genius.app</string>
+</resources>
