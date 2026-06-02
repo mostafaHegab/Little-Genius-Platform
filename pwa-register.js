@@ -1,13 +1,29 @@
 // PWA Installation management
 let deferredPrompt = null;
 
+// Determine base path for GitHub Pages or other deployments
+function getBasePath() {
+	const pathname = window.location.pathname;
+	// Check if deployed in subdirectory (e.g., /Little-Genius-Platform/)
+	if (pathname.includes("/Little-Genius-Platform/")) {
+		return "/Little-Genius-Platform/";
+	}
+	return "/";
+}
+
+const BASE_PATH = getBasePath();
+
 // Register service worker for offline support
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
+		const swPath = BASE_PATH + "service-worker.js";
+		console.log("📦 Attempting to register Service Worker from:", swPath);
+
 		navigator.serviceWorker
-			.register("service-worker.js")
+			.register(swPath, { scope: BASE_PATH })
 			.then((registration) => {
 				console.log("✅ Service Worker registered successfully:", registration);
+				console.log("   Scope:", registration.scope);
 
 				// Check for updates periodically
 				setInterval(() => {
@@ -30,6 +46,7 @@ if ("serviceWorker" in navigator) {
 			})
 			.catch((error) => {
 				console.warn("❌ Service Worker registration failed:", error);
+				console.error("   Error details:", error.message);
 			});
 	});
 
@@ -107,8 +124,23 @@ function hideInstallButton() {
 
 // Log PWA status on startup
 console.log("🔍 PWA Status Check:");
+console.log("  - Base Path:", BASE_PATH);
+console.log("  - Full URL:", window.location.href);
 console.log("  - HTTPS:", window.location.protocol === "https:" ? "✅" : "❌");
 console.log("  - ServiceWorker Support:", "serviceWorker" in navigator ? "✅" : "❌");
 console.log("  - Manifest Link:", document.querySelector('link[rel="manifest"]') ? "✅" : "❌");
+console.log("  - Manifest href:", document.querySelector('link[rel="manifest"]')?.href || "N/A");
 console.log("  - Standalone Mode:", window.navigator.standalone === true ? "✅" : "Not applicable");
-console.log("  - URL:", window.location.href);
+
+// Validate manifest
+setTimeout(() => {
+	fetch(BASE_PATH + "manifest.json")
+		.then((r) => r.json())
+		.then((manifest) => {
+			console.log("✅ Manifest loaded successfully");
+			console.log("   start_url:", manifest.start_url);
+			console.log("   scope:", manifest.scope);
+			console.log("   icons count:", manifest.icons?.length || 0);
+		})
+		.catch((err) => console.warn("❌ Manifest load error:", err));
+}, 1000);
