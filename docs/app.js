@@ -330,10 +330,10 @@ function updateDynamicLabels(category) {
 		},
 		play: {
 			title: "عنوان اللعبة:",
-			media: "رابط اللعبة التفاعلية (أي رابط):",
+			media: "رابط اللعبة (Wordwall أو Canva):",
 			titlePlaceholder: "مثال: لعبة التوصيل",
-			mediaPlaceholder: "https://example.com/game أو أي رابط",
-			mediaHint: "✅ يمكنك إضافة أي رابط (موقع ويب، تطبيق، إلخ)",
+			mediaPlaceholder: "https://wordwall.net/... أو https://canva.com/... أو كود HTML",
+			mediaHint: "ℹ️ يمكنك إدراج رابط مباشر أو كود HTML embed من Wordwall/Canva (سيتم استخراج الرابط تلقائياً)",
 		},
 		pdf: {
 			title: "عنوان الملف:",
@@ -461,8 +461,7 @@ function updateAdminList(filterLevel = null, filterCategory = null) {
 		};
 
 		row.innerHTML = `
-                    <div class="font-bold text-gray-800 text-sm">📍 ${levelDisplay} ⬅️ ${catDisplay}</div>
-                    <div class="text-indigo-600 font-bold text-xs">🎯 : ${targetDisplay}</div>
+                    <div class="font-bold text-gray-800 text-sm">🎯 : ${targetDisplay}</div>
                 `;
 		row.appendChild(deleteBtn);
 		container.appendChild(row);
@@ -548,6 +547,80 @@ function isValidGoogleDriveLink(url) {
 	}
 }
 
+/**
+ * Validate if a URL is a valid Wordwall or Canva link
+ * Accepts formats:
+ * - https://wordwall.net/...
+ * - https://www.wordwall.net/...
+ * - https://www.canva.com/...
+ * - https://canva.com/...
+ */
+function isValidWordwallOrCanvaLink(url) {
+	if (!url) return false;
+	try {
+		const urlObj = new URL(url);
+		const hostname = urlObj.hostname.toLowerCase();
+		// Check if it's Wordwall or Canva
+		return hostname.includes("wordwall.net") || hostname.includes("canva.com");
+	} catch (e) {
+		return false;
+	}
+}
+
+/**
+ * Check if input is HTML code (contains HTML tags)
+ */
+function isHtmlCode(input) {
+	return /<[^>]*>/g.test(input);
+}
+
+/**
+ * Extract iframe src from HTML embed code
+ * Looks for <iframe src="..."> and extracts the URL
+ */
+function extractIframeSrcFromHtml(htmlCode) {
+	try {
+		// Match iframe tag with src attribute
+		const iframeMatch = htmlCode.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+		if (iframeMatch && iframeMatch[1]) {
+			return iframeMatch[1];
+		}
+		return null;
+	} catch (e) {
+		console.error("Error extracting iframe src:", e);
+		return null;
+	}
+}
+
+/**
+ * Format Canva URL by adding ?embed parameter if not present
+ */
+function formatPlayUrl(url) {
+	if (url.includes("canva.com") && !url.endsWith("?embed")) {
+		return url + "?embed";
+	}
+	return url;
+}
+
+/**
+ * Process media input for play category
+ * If HTML code is detected, extract the iframe src
+ * Otherwise, return the input as-is
+ */
+function processPlayMediaInput(input) {
+	if (isHtmlCode(input)) {
+		const extractedUrl = extractIframeSrcFromHtml(input);
+		if (extractedUrl) {
+			return extractedUrl;
+		} else {
+			// HTML code but no iframe found
+			return null;
+		}
+	}
+	// Not HTML, return as-is
+	return input;
+}
+
 document.getElementById("admin-form").addEventListener("submit", async (e) => {
 	e.preventDefault();
 
@@ -564,13 +637,29 @@ document.getElementById("admin-form").addEventListener("submit", async (e) => {
 		const category = document.getElementById("admin-category-select").value;
 		const letter = document.getElementById("admin-letter-select").value;
 		const title = document.getElementById("admin-content-title").value;
-		const mediaUrl = document.getElementById("admin-media-url").value;
+		let mediaUrl = document.getElementById("admin-media-url").value;
 		const pdfUrl = document.getElementById("admin-pdf-url").value;
 
-		// Validate Google Drive links if they are present
-		// For play category, allow any link. For others, enforce Google Drive
+		// Process media URL for play category (extract from HTML if needed)
+		if (mediaUrl && category === "play") {
+			const processedUrl = processPlayMediaInput(mediaUrl);
+			if (isHtmlCode(mediaUrl) && !processedUrl) {
+				showCustomAlert("⚠️", "لم أستطع استخراج الرابط من كود HTML! تأكد من أنه يحتوي على عنصر iframe بسمة src");
+				return;
+			}
+			mediaUrl = processedUrl;
+		}
+
+		// Validate URLs based on category
 		if (mediaUrl) {
-			if (category !== "play" && !isValidGoogleDriveLink(mediaUrl)) {
+			if (category === "play") {
+				// For play category, only accept Wordwall or Canva
+				if (!isValidWordwallOrCanvaLink(mediaUrl)) {
+					showCustomAlert("⚠️", "يرجى استخدام رابط من Wordwall أو Canva فقط! مثال: wordwall.net أو canva.com");
+					return;
+				}
+			} else if (!isValidGoogleDriveLink(mediaUrl)) {
+				// For other categories, enforce Google Drive
 				showCustomAlert("⚠️", "رابط Google Drive غير صحيح! يرجى التأكد من أن الرابط يبدأ بـ drive.google.com");
 				return;
 			}
@@ -702,7 +791,6 @@ function openGeneralDetails(data, defaultTitle) {
 	if (data) {
 		emptySection.classList.add("hide");
 
-		console.log("🚀 ~ openGeneralDetails ~ mediaUrl:", data.mediaUrl);
 		if (data.mediaUrl) {
 			// For Google Drive links, try to embed as video
 			if (data.mediaUrl.includes("drive.google.com")) {
@@ -712,12 +800,17 @@ function openGeneralDetails(data, defaultTitle) {
 					const fileId = match[1];
 					const viewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-					videoWrapper.innerHTML = `<iframe src="${viewUrl}" width="100%" height="400px" allowfullscreen style="border-radius: 0.5rem;"></iframe>`;
+					videoWrapper.innerHTML = `<iframe src="${viewUrl}" allowfullscreen></iframe>`;
 					videoSection.classList.remove("hide");
 				}
+			} else if (data.mediaUrl.includes("canva.com") || data.mediaUrl.includes("wordwall.net")) {
+				// For Canva and Wordwall links, display as embedded iframe
+				const formattedUrl = formatPlayUrl(data.mediaUrl);
+				videoWrapper.innerHTML = `<iframe loading="lazy" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0; margin: 0;" src="${formattedUrl}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
+				videoSection.classList.remove("hide");
 			} else {
-				// For other URLs, use video tag
-				videoWrapper.innerHTML = `<video width="100%" height="auto" controls style="border-radius: 0.5rem;"><source src="${data.mediaUrl}" type="video/mp4"><p class="text-sm text-gray-600">متصفحك لا يدعم تشغيل الفيديو. يرجى فتح الرابط مباشرة.</p></video>`;
+				// For other URLs, use video tag with warning
+				videoWrapper.innerHTML = `<div class="mb-3 p-3 bg-yellow-100 border border-yellow-400 rounded-lg"><p class="text-sm text-yellow-800">⚠️ نوع الوسائط قد لا يكون مدعوماً. يرجى التأكد من أن الملف بصيغة صحيحة.</p></div><video width="100%" height="auto" controls style="border-radius: 0.5rem;"><source src="${data.mediaUrl}" type="video/mp4"><p class="text-sm text-gray-600">متصفحك لا يدعم تشغيل الفيديو. يرجى فتح الرابط مباشرة.</p></video>`;
 				videoSection.classList.remove("hide");
 			}
 		} else {
