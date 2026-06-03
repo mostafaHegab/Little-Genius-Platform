@@ -784,6 +784,7 @@ function openGeneralDetails(data, defaultTitle) {
 	document.getElementById("modal-letter-title").innerText = data ? data.title : defaultTitle;
 
 	const videoSection = document.getElementById("modal-video-section");
+	const videoSectionTitle = document.getElementById("modal-video-title");
 	const videoWrapper = document.getElementById("modal-video-iframe-wrapper");
 	const pdfSection = document.getElementById("modal-pdf-section");
 	const emptySection = document.getElementById("modal-empty-section");
@@ -802,16 +803,19 @@ function openGeneralDetails(data, defaultTitle) {
 
 					videoWrapper.innerHTML = `<iframe src="${viewUrl}" allowfullscreen></iframe>`;
 					videoSection.classList.remove("hide");
+					videoSectionTitle.classList.remove("hide");
 				}
 			} else if (data.mediaUrl.includes("canva.com") || data.mediaUrl.includes("wordwall.net")) {
 				// For Canva and Wordwall links, display as embedded iframe
 				const formattedUrl = formatPlayUrl(data.mediaUrl);
 				videoWrapper.innerHTML = `<iframe loading="lazy" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0; margin: 0;" src="${formattedUrl}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
 				videoSection.classList.remove("hide");
+				videoSectionTitle.classList.add("hide"); // Hide title for play category since it may already be in the iframe
 			} else {
 				// For other URLs, use video tag with warning
 				videoWrapper.innerHTML = `<div class="mb-3 p-3 bg-yellow-100 border border-yellow-400 rounded-lg"><p class="text-sm text-yellow-800">⚠️ نوع الوسائط قد لا يكون مدعوماً. يرجى التأكد من أن الملف بصيغة صحيحة.</p></div><video width="100%" height="auto" controls style="border-radius: 0.5rem;"><source src="${data.mediaUrl}" type="video/mp4"><p class="text-sm text-gray-600">متصفحك لا يدعم تشغيل الفيديو. يرجى فتح الرابط مباشرة.</p></video>`;
 				videoSection.classList.remove("hide");
+				videoSectionTitle.classList.remove("hide"); // Show title for other video types
 			}
 		} else {
 			videoSection.classList.add("hide");
