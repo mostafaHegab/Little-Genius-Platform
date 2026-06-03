@@ -171,7 +171,9 @@ function fallbackToLocalStorage() {
 
 /* بوابة الدخول السحابية المشفرة */
 function openAdminGate() {
-	console.log("🚀 ~ openAdminGate ~ auth.currentUser:", auth?.currentUser?.email);
+	if (auth?.currentUser?.email !== "admin@kg.com") {
+		return;
+	}
 	// if email is not in admins list, return
 	if (isCloudMode && auth && auth.currentUser && !auth.currentUser.isAnonymous) {
 		nav("admin-screen");
