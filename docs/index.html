@@ -27,8 +27,55 @@
 		<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 	</head>
 	<body>
+		<div id="loading-screen" class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-sky-300 to-blue-500 text-white">
+			<div class="text-8xl rocket">🚀</div>
+
+			<h1 class="text-4xl font-black mt-6">أهلاً يا بطل!</h1>
+
+			<p class="text-xl mt-4 font-bold">جاري تجهيز المغامرة التعليمية...</p>
+
+			<div class="flex gap-2 mt-8 text-4xl">
+				<span class="star">⭐</span>
+				<span class="star">⭐</span>
+				<span class="star">⭐</span>
+			</div>
+		</div>
+
+		<!-- شاشة تسجيل الدخول (تظهر فقط إذا لم يتم تسجيل الدخول سابقاً) -->
+		<div id="login-screen" class="flex flex-col items-center justify-center gap-4 hide">
+			<div class="relative w-full text-center mb-10">
+				<h1 class="main-title font-black">منصة العبقري الصغير</h1>
+			</div>
+
+			<div class="child-modal-content user-login-form p-6 text-center space-y-4 max-w-sm">
+				<span class="text-6xl block">🔐</span>
+				<p class="text-xs text-gray-400 leading-relaxed">يرجى تسجيل الدخول للوصول إلى المنصة</p>
+
+				<div class="space-y-3 text-right">
+					<div>
+						<label class="block text-xs font-bold text-gray-500 mb-1">البريد الإلكتروني:</label>
+						<input
+							type="email"
+							id="user-email"
+							class="w-full p-3 rounded-xl border-2 border-indigo-100 outline-none text-sm text-center font-bold"
+							placeholder="your-name@gmail.com"
+							required
+						/>
+					</div>
+					<div>
+						<label class="block text-xs font-bold text-gray-500 mb-1">كلمة السر:</label>
+						<input type="password" id="user-password" class="w-full p-3 rounded-xl border-2 border-indigo-100 outline-none text-sm text-center font-bold" placeholder="••••••••" required />
+					</div>
+				</div>
+
+				<div class="flex gap-2 pt-2">
+					<button onclick="loginUser()" class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold active:scale-95 text-sm">تسجيل دخول 🔑</button>
+				</div>
+			</div>
+		</div>
+
 		<!-- الشاشة الرئيسية -->
-		<div id="home" class="min-h-screen flex flex-col items-center py-10 px-4">
+		<div id="home" class="min-h-screen flex flex-col items-center py-10 px-4 hide">
 			<div class="relative w-full text-center">
 				<!-- الضغط على عنوان المنصة يفتح شاشة التحقق السحابية المشفرة -->
 				<h1 class="main-title font-black" onclick="openAdminGate()">منصة العبقري الصغير</h1>
@@ -140,7 +187,6 @@
 					<button onclick="loginAdmin()" class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold active:scale-95 text-sm">تسجيل دخول 🔑</button>
 					<button onclick="closeLockModal()" class="flex-1 bg-red-100 text-red-600 py-3 rounded-2xl font-bold active:scale-95 text-sm">إلغاء ❌</button>
 				</div>
-				<p class="text-[10px] text-gray-400">ملاحظة: أول بريد وكلمة سر تكتبينهم سيتم تسجيلهم كحسابك الرئيسي تلقائياً!</p>
 			</div>
 		</div>
 

@@ -319,13 +319,15 @@ body {
 	background: white;
 	border-radius: 40px;
 	width: 95vw;
-	height: 95vh;
 	border: 8px solid var(--gold);
 	box-shadow: 0 20px 0 rgba(0, 0, 0, 0.3);
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.child-modal-content:not(.user-login-form) {
+	height: 95vh;
 }
 @keyframes popIn {
 	from {

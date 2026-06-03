@@ -123,6 +123,8 @@ function listenToCloudData() {
 							if (document.getElementById("act").classList.contains("hide") === false) {
 								refreshActivityContent();
 							}
+							document.getElementById("loading-screen").classList.add("hide");
+							nav("home");
 						}
 					},
 					(error) => {
@@ -163,10 +165,14 @@ function fallbackToLocalStorage() {
 	if (document.getElementById("act").classList.contains("hide") === false) {
 		refreshActivityContent();
 	}
+	document.getElementById("loading-screen").classList.add("hide");
+	nav("home");
 }
 
 /* بوابة الدخول السحابية المشفرة */
 function openAdminGate() {
+	console.log("🚀 ~ openAdminGate ~ auth.currentUser:", auth?.currentUser?.email);
+	// if email is not in admins list, return
 	if (isCloudMode && auth && auth.currentUser && !auth.currentUser.isAnonymous) {
 		nav("admin-screen");
 	} else {
@@ -212,23 +218,46 @@ async function loginAdmin() {
 				closeLockModal();
 				nav("admin-screen");
 			} catch (err) {
-				if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
-					try {
-						await auth.createUserWithEmailAndPassword(email, password);
-						closeLockModal();
-						nav("admin-screen");
-						showCustomAlert("👑", "أهلاً بكِ معلمتنا العبقرية! تم إنشاء حسابكِ السحابي المؤمن بنجاح.");
-					} catch (signupErr) {
-						showCustomAlert("❌", "خطأ في تسجيل الدخول أو الرمز خاطئ.");
-					}
-				} else {
-					showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
-				}
+				showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
 			}
 		} else {
 			if (password === "2026") {
 				closeLockModal();
 				nav("admin-screen");
+			} else {
+				showCustomAlert("❌", "رمز المرور غير صحيح!");
+			}
+		}
+	} finally {
+		if (loginBtn) setButtonLoading(loginBtn, false);
+	}
+}
+
+async function loginUser() {
+	const email = document.getElementById("user-email").value.trim();
+	const password = document.getElementById("user-password").value;
+	const loginBtn = document.querySelector("#login-screen button[onclick='loginUser()']");
+
+	if (!email || !password) {
+		showCustomAlert("⚠️", "يرجى كتابة البريد الإلكتروني وكلمة السر!");
+		return;
+	}
+
+	try {
+		if (loginBtn) setButtonLoading(loginBtn, true, "تسجيل دخول 🔑");
+
+		if (isCloudMode && auth) {
+			try {
+				await auth.signInWithEmailAndPassword(email, password);
+				closeLockModal();
+				nav("home");
+			} catch (err) {
+				showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
+			}
+		} else {
+			if (password === "2026") {
+				closeLockModal();
+				nav("home");
 			} else {
 				showCustomAlert("❌", "رمز المرور غير صحيح!");
 			}
@@ -1022,12 +1051,27 @@ function checkWork() {
 	confetti({ particleCount: 200, spread: 80, origin: { y: 0.8 } });
 }
 
-window.onload = async function () {
-	console.log("App is initializing...");
+window.onload = function () {
 	try {
-		await initCloudApp();
-		console.log("Initialization complete.");
+		setupFirebaseEnvironment();
+
+		auth.onAuthStateChanged(async (user) => {
+			if (!user) {
+				nav("login-screen");
+				return;
+			}
+
+			await initCloudApp();
+		});
 	} catch (err) {
-		console.error("Initialization error:", err);
+		console.error(err);
+
+		document.getElementById("loading-screen").innerHTML = `
+            <div class="text-center">
+                <h2 class="text-red-600 text-2xl font-bold">
+                    Failed to connect
+                </h2>
+            </div>
+        `;
 	}
 };
