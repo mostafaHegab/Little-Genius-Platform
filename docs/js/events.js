@@ -27,6 +27,7 @@ window.onload = function () {
 			document.getElementById("logout-btn").onclick = logoutAdmin;
 
 			await initCloudApp("admin-screen");
+			fetchCloudDataForAdmin("step", "letters");
 			await fetchActiveUsers();
 		});
 	} catch (err) {
@@ -103,19 +104,10 @@ document.getElementById("admin-form").addEventListener("submit", async (e) => {
 		const collectionPath = getCollectionPath(level, category);
 		console.log(`Saving to: ${collectionPath}/${documentId}`);
 
-		if (isCloudMode && db) {
-			try {
-				await db.collection(collectionPath).doc(documentId).set(payload);
-				showCustomAlert("🌟", "تم الحفظ والنشر بنجاح سحابياً!");
-			} catch (err) {
-				console.error("Cloud save failed:", err);
-				saveToLocalStore(level, category, documentId, payload);
-				showCustomAlert("💾", "تم تفعيل وضع حفظ الموبايل الداخلي بنجاح!");
-			}
-		} else {
-			saveToLocalStore(level, category, documentId, payload);
-			showCustomAlert("💾", "تم حفظ وتحديث المحتوى بنجاح داخل هاتفك!");
-		}
+		await db.collection(collectionPath).doc(documentId).set(payload);
+		showCustomAlert("🌟", "تم الحفظ والنشر بنجاح سحابياً!");
+
+		await fetchCloudDataForAdmin(level, category);
 
 		document.getElementById("admin-form").reset();
 		toggleLetterField();
@@ -198,6 +190,21 @@ document.getElementById("refresh-users-btn").addEventListener("click", async (e)
 	e.target.disabled = true;
 
 	await fetchActiveUsers();
+
+	e.target.classList.remove("button-loading");
+	e.target.disabled = false;
+});
+
+document.getElementById("refresh-content-btn").addEventListener("click", async (e) => {
+	e.preventDefault();
+
+	const level = document.getElementById("admin-level-select").value;
+	const category = document.getElementById("admin-category-select").value;
+
+	e.target.classList.add("button-loading");
+	e.target.disabled = true;
+
+	await fetchCloudDataForAdmin(level, category);
 
 	e.target.classList.remove("button-loading");
 	e.target.disabled = false;

@@ -2,7 +2,7 @@ cloudData = initializeNestedCloudData();
 
 /* بوابة الدخول السحابية المشفرة */
 async function openAdminGate() {
-	if (isCloudMode && auth && auth.currentUser && !auth.currentUser.isAnonymous) {
+	if (auth && auth.currentUser && !auth.currentUser.isAnonymous) {
 		await fetchActiveUsers();
 		document.getElementById("logout-btn").onclick = logoutAdmin;
 		nav("admin-screen");
@@ -26,24 +26,13 @@ async function loginAdmin() {
 	try {
 		if (loginBtn) setButtonLoading(loginBtn, true, "تسجيل دخول 🔑");
 
-		if (isCloudMode && auth) {
-			try {
-				await auth.signInWithEmailAndPassword(email, password);
-				document.getElementById("logout-btn").onclick = logoutAdmin;
-				closeLockModal();
-				nav("admin-screen");
-			} catch (err) {
-				showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
-			}
-		} else {
-			if (password === "2026") {
-				document.getElementById("logout-btn").onclick = logoutAdmin;
-				closeLockModal();
-				nav("admin-screen");
-			} else {
-				showCustomAlert("❌", "رمز المرور غير صحيح!");
-			}
-		}
+		await auth.signInWithEmailAndPassword(email, password);
+		document.getElementById("logout-btn").onclick = logoutAdmin;
+		closeLockModal();
+		nav("admin-screen");
+	} catch (err) {
+		console.error("Error logging in:", err);
+		showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
 	} finally {
 		if (loginBtn) setButtonLoading(loginBtn, false);
 	}
@@ -61,25 +50,22 @@ async function loginUser() {
 
 	try {
 		if (loginBtn) setButtonLoading(loginBtn, true, "تسجيل الدخول 🔑");
-
-		if (isCloudMode && db) {
-			const userDoc = await db.collection("users").doc(email).get();
-			if (!userDoc.exists) {
-				showCustomAlert("❌", "المستخدم غير موجود، يرجى التحقق من البريد الإلكتروني.");
-				return;
-			}
-
-			const userData = userDoc.data();
-			if (userData.password !== password) {
-				showCustomAlert("❌", "كلمة السر غير صحيحة!");
-				return;
-			}
-
-			localStorage.setItem("genius_kids_current_user", JSON.stringify({ email }));
-			document.getElementById("logout-btn").onclick = logoutUser;
-			document.getElementById("home-title").onclick = undefined;
-			nav("home");
+		const userDoc = await db.collection("users").doc(email).get();
+		if (!userDoc.exists) {
+			showCustomAlert("❌", "المستخدم غير موجود، يرجى التحقق من البريد الإلكتروني.");
+			return;
 		}
+
+		const userData = userDoc.data();
+		if (userData.password !== password) {
+			showCustomAlert("❌", "كلمة السر غير صحيحة!");
+			return;
+		}
+
+		localStorage.setItem("genius_kids_current_user", JSON.stringify({ email }));
+		document.getElementById("logout-btn").onclick = logoutUser;
+		document.getElementById("home-title").onclick = undefined;
+		nav("home");
 	} catch (err) {
 		showCustomAlert("❌", "تعذر تسجيل الدخول، يرجى التحقق من صحة البيانات.");
 	} finally {
@@ -94,13 +80,12 @@ async function logoutAdmin() {
 		if (logoutBtn) setButtonLoading(logoutBtn, true, "تسجيل خروج 🚪");
 		if (mainLogoutBtn) setButtonLoading(mainLogoutBtn, true, "تسجيل خروج 🚪");
 
-		if (isCloudMode && auth) {
-			try {
-				await auth.signOut();
-			} catch (e) {}
-		}
+		await auth.signOut();
 		nav("login-screen");
 		showCustomAlert("🚪", "تم تسجيل خروجكِ بأمان من الإدارة.");
+	} catch (err) {
+		console.error("Error logging out:", err);
+		showCustomAlert("❌", "تعذر تسجيل الخروج، يرجى المحاولة مرة أخرى.");
 	} finally {
 		if (logoutBtn) setButtonLoading(logoutBtn, false);
 		if (mainLogoutBtn) setButtonLoading(mainLogoutBtn, false);
@@ -127,15 +112,13 @@ async function deleteUser(email, button) {
 	}
 
 	try {
-		if (isCloudMode && db) {
-			await db.collection("users").doc(email).delete();
-			showCustomAlert("✅", "تم حذف المستخدم بنجاح!");
-			await fetchActiveUsers();
-		} else {
-			showCustomAlert("❌", "تعذر حذف المستخدم، يرجى التحقق من الاتصال بالإنترنت.");
-		}
+		await db.collection("users").doc(email).delete();
+		showCustomAlert("✅", "تم حذف المستخدم بنجاح!");
+		await fetchActiveUsers();
 	} catch (err) {
 		console.error("Error deleting user:", err);
 		showCustomAlert("❌", "حدث خطأ أثناء حذف المستخدم.");
+	} finally {
+		if (button) setButtonLoading(button, false);
 	}
 }

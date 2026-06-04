@@ -1,4 +1,8 @@
 var ALPHA = ["أ", "ب", "م", "ح", "ج", "د", "خ", "ت", "ل", "س", "ن", "ر", "ف", "ك", "ق", "ي", "ع", "ش", "و", "هـ", "ذ", "ظ", "ز", "ط", "ص", "ض", "ث", "غ"];
+
+var levelNames = { step: "خطواتي الأولى", kg1: "KG1", kg2: "KG2" };
+var catNames = { letters: "ألبوم الحروف", stories: "القصص", play: "هيا نلعب", pdf: "ملفات الطباعة" };
+
 var currentLevelMode = "step"; // step, kg1, kg2
 var currentActivityMode = "letters"; // letters, draw, stories, play, pdf
 var canvas,
@@ -17,6 +21,5 @@ var firebaseConfig = {
 // تهيئة المتغيرات الأساسية لدعم التخزين المزدوج (السحابة والمحلي)
 var db = null;
 var auth = null;
-var isCloudMode = false;
 
 var cloudData;
