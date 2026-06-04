@@ -172,6 +172,14 @@ window.onload = function () {
 				let savedUser = localStorage.getItem("genius_kids_current_user");
 				if (savedUser) {
 					savedUser = JSON.parse(savedUser);
+
+					const user = await db.collection("users").doc(savedUser.email).get();
+					if (!user.exists) {
+						localStorage.removeItem("genius_kids_current_user");
+						nav("login-screen");
+						return;
+					}
+
 					document.getElementById("logout-btn").onclick = logoutUser;
 					initCloudApp("home");
 					return;
