@@ -856,11 +856,11 @@ async function fetchActiveUsers() {
 				usersSnapshot.forEach((doc) => {
 					const user = doc.data();
 					const userDiv = document.createElement("div");
-					userDiv.className = "p-2 bg-gray-100 rounded-lg mb-2 flex justify-between items-center";
+					userDiv.className = "p-2 bg-gray-100 rounded-lg mb-2 flex justify-between items-center user-item";
 					userDiv.innerHTML = `
 						<div>
-                            <p class="font-bold text-gray-800">${user.name || "مستخدم مجهول"}</p>
-                            <p class="text-xs text-gray-600">${user.email}</p>
+                            <p class="font-bold text-gray-800 user-name">${user.name || "مستخدم مجهول"}</p>
+                            <p class="text-xs text-gray-600 user-email">${user.email}</p>
                         </div>
                         <button class="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-bold active:scale-95" onclick="showCustomAlert('✅', 'كلمة السر: ${user.password || "غير متوفرة"}')">كلمة السر</button>
 						<button class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold active:scale-95" onclick="deleteUser('${user.email}', this)">حذف</button>

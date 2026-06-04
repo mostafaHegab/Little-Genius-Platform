@@ -1,3 +1,47 @@
+window.onload = function () {
+	try {
+		setupFirebaseEnvironment();
+
+		auth.onAuthStateChanged(async (user) => {
+			if (!user) {
+				let savedUser = localStorage.getItem("genius_kids_current_user");
+				if (savedUser) {
+					savedUser = JSON.parse(savedUser);
+
+					const user = await db.collection("users").doc(savedUser.email).get();
+					if (!user.exists) {
+						localStorage.removeItem("genius_kids_current_user");
+						nav("login-screen");
+						return;
+					}
+
+					document.getElementById("logout-btn").onclick = logoutUser;
+					initCloudApp("home");
+					return;
+				} else {
+					nav("login-screen");
+					return;
+				}
+			}
+
+			document.getElementById("logout-btn").onclick = logoutAdmin;
+
+			await initCloudApp("admin-screen");
+			await fetchActiveUsers();
+		});
+	} catch (err) {
+		console.error(err);
+
+		document.getElementById("loading-screen").innerHTML = `
+            <div class="text-center">
+                <h2 class="text-red-600 text-2xl font-bold">
+                    Failed to connect
+                </h2>
+            </div>
+        `;
+	}
+};
+
 document.getElementById("admin-form").addEventListener("submit", async (e) => {
 	e.preventDefault();
 
@@ -163,46 +207,16 @@ document.getElementById("logout-btn").onclick = logoutUser;
 
 document.getElementById("home-title").onclick = openAdminGate;
 
-window.onload = function () {
-	try {
-		setupFirebaseEnvironment();
-
-		auth.onAuthStateChanged(async (user) => {
-			if (!user) {
-				let savedUser = localStorage.getItem("genius_kids_current_user");
-				if (savedUser) {
-					savedUser = JSON.parse(savedUser);
-
-					const user = await db.collection("users").doc(savedUser.email).get();
-					if (!user.exists) {
-						localStorage.removeItem("genius_kids_current_user");
-						nav("login-screen");
-						return;
-					}
-
-					document.getElementById("logout-btn").onclick = logoutUser;
-					initCloudApp("home");
-					return;
-				} else {
-					nav("login-screen");
-					return;
-				}
-			}
-
-			document.getElementById("logout-btn").onclick = logoutAdmin;
-
-			await initCloudApp("admin-screen");
-			await fetchActiveUsers();
-		});
-	} catch (err) {
-		console.error(err);
-
-		document.getElementById("loading-screen").innerHTML = `
-            <div class="text-center">
-                <h2 class="text-red-600 text-2xl font-bold">
-                    Failed to connect
-                </h2>
-            </div>
-        `;
-	}
-};
+document.getElementById("user-search-input").addEventListener("input", function () {
+	const query = this.value.toLowerCase();
+	const userItems = document.querySelectorAll(".user-item");
+	userItems.forEach((item) => {
+		const name = item.querySelector(".user-name").textContent.toLowerCase();
+		const email = item.querySelector(".user-email").textContent.toLowerCase();
+		if (name.startsWith(query) || email.startsWith(query)) {
+			item.classList.remove("hidden");
+		} else {
+			item.classList.add("hidden");
+		}
+	});
+});
