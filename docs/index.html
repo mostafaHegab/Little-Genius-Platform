@@ -43,7 +43,7 @@
 		<!-- شاشة تسجيل الدخول (تظهر فقط إذا لم يتم تسجيل الدخول سابقاً) -->
 		<div id="login-screen" class="flex flex-col items-center justify-center gap-4 hide">
 			<div class="relative w-full text-center mb-10">
-				<h1 class="main-title font-black">منصة العبقري الصغير</h1>
+				<h1 class="main-title font-black" onclick="openAdminGate()">منصة العبقري الصغير</h1>
 			</div>
 
 			<div class="child-modal-content user-login-form p-6 text-center space-y-4 max-w-sm">
@@ -75,9 +75,10 @@
 
 		<!-- الشاشة الرئيسية -->
 		<div id="home" class="min-h-screen flex flex-col items-center py-10 px-4 hide">
-			<div class="relative w-full text-center">
-				<!-- الضغط على عنوان المنصة يفتح شاشة التحقق السحابية المشفرة -->
-				<h1 class="main-title font-black" onclick="openAdminGate()">منصة العبقري الصغير</h1>
+			<div class="p-5 text-white flex justify-between items-center">
+				<h1 id="home-title" class="main-title font-black">منصة العبقري الصغير</h1>
+				<button class="bg-red-500 px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b91c1c]" id="logout-btn">تسجيل خروج 🚪</button>
+				<div class="w-12"></div>
 			</div>
 
 			<p class="sub-text">هيا نتعلم ونلعب 🌈 🚀</p>
@@ -184,7 +185,9 @@
 		<div id="admin-screen" class="hide h-screen flex flex-col bg-white">
 			<div class="p-5 bg-indigo-950 text-white flex justify-between items-center">
 				<button onclick="logoutAdmin()" class="bg-red-500 px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b91c1c]">تسجيل خروج 🚪</button>
-				<span class="font-black text-xl text-yellow-400">لوحة تحكم المعلمة 👩‍🏫</span>
+				<button onclick="nav('home')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b45309]">الرئيسية 🏠</button>
+				<span class="font-black text-xl text-yellow-400">لوحة تحكم المعلمة - إدارة المحتوى👩‍🏫</span>
+				<button onclick="nav('user-management')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b45309]">إدارة المستخدمين</button>
 				<div class="w-12"></div>
 			</div>
 
@@ -265,6 +268,62 @@
 			</div>
 		</div>
 
+		<div id="user-management" class="hide h-screen flex flex-col bg-white">
+			<div class="p-5 bg-indigo-950 text-white flex justify-between items-center">
+				<button onclick="logoutAdmin()" class="bg-red-500 px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b91c1c]">تسجيل خروج 🚪</button>
+				<button onclick="nav('home')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b45309]">الرئيسية 🏠</button>
+				<span class="font-black text-xl text-yellow-400">لوحة تحكم المعلمة - إدارة المستخدمين 👩‍🏫</span>
+				<button onclick="nav('admin-screen')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl font-black text-sm shadow-[0_3px_0_#b45309]">إدارة المحتوى</button>
+				<div class="w-12"></div>
+			</div>
+
+			<div class="flex-1 overflow-y-auto p-6 flex gap-6 w-full">
+				<form id="user-management-form" class="flex-1 space-y-4 bg-purple-50 p-6 rounded-3xl border-4 border-purple-200">
+					<h3 class="font-black text-purple-950 text-lg mb-2">إضافة مستخدم جديد :</h3>
+
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">الاسم:</label>
+						<input type="text" id="new-user-name" class="w-full p-3 rounded-2xl border-2 border-purple-300 outline-none text-sm font-bold bg-white" placeholder="اسم المستخدم" required />
+					</div>
+
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">البريد الإلكتروني للمستخدم:</label>
+						<input
+							type="email"
+							id="new-user-email"
+							class="w-full p-3 rounded-2xl border-2 border-purple-300 outline-none text-sm font-bold bg-white"
+							placeholder="example@example.com"
+							required
+						/>
+					</div>
+
+					<div>
+						<label class="block text-xs font-bold mb-1 text-gray-600">كلمة السر:</label>
+						<input
+							type="text"
+							id="new-user-password"
+							class="w-full p-3 rounded-2xl border-2 border-purple-300 outline-none text-sm font-bold bg-white"
+							placeholder="••••••••"
+							required
+							minlength="6"
+						/>
+					</div>
+
+					<button type="submit" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95">إضافة مستخدم جديد🚀</button>
+				</form>
+
+				<div class="flex-1 bg-gray-50 p-6 rounded-3xl border overflow-y-auto">
+					<div class="flex justify-between items-center mb-4">
+						<h3 class="font-bold text-gray-700 mb-4">المستخدمين النشطين:</h3>
+						<button id="refresh-users-btn" class="bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-[0_3px_0_#1e40af]">تحديث القائمة 🔄</button>
+					</div>
+					<div id="active-users-list" class="space-y-4">
+						<!-- سيتم عرض المحتويات مع تفاصيلها وزر للحذف -->
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- نافذة منبثقة تفاعلية للطفل لعرض المحتوى للرسومات والالعاب -->
 		<div id="child-modal" class="child-modal hide">
 			<div class="child-modal-content">
@@ -306,7 +365,10 @@
 			</div>
 		</div>
 
+		<script src="variables.js"></script>
+		<script src="helpers.js"></script>
 		<script src="app.js"></script>
+		<script src="events.js"></script>
 		<script src="pwa-register.js"></script>
 	</body>
 </html>
