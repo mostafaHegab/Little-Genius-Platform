@@ -4,7 +4,6 @@ cloudData = initializeNestedCloudData();
 async function openAdminGate() {
 	if (auth && auth.currentUser && !auth.currentUser.isAnonymous) {
 		await fetchActiveUsers();
-		document.getElementById("logout-btn").onclick = logoutAdmin;
 		nav("admin-screen");
 	} else {
 		document.getElementById("admin-email").value = "";
@@ -27,7 +26,6 @@ async function loginAdmin() {
 		if (loginBtn) setButtonLoading(loginBtn, true, "تسجيل دخول 🔑");
 
 		await auth.signInWithEmailAndPassword(email, password);
-		document.getElementById("logout-btn").onclick = logoutAdmin;
 		closeLockModal();
 		nav("admin-screen");
 	} catch (err) {

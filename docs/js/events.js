@@ -4,27 +4,9 @@ window.onload = function () {
 
 		auth.onAuthStateChanged(async (user) => {
 			if (!user) {
-				let savedUser = localStorage.getItem("genius_kids_current_user");
-				if (savedUser) {
-					savedUser = JSON.parse(savedUser);
-
-					const user = await db.collection("users").doc(savedUser.email).get();
-					if (!user.exists) {
-						localStorage.removeItem("genius_kids_current_user");
-						nav("login-screen");
-						return;
-					}
-
-					document.getElementById("logout-btn").onclick = logoutUser;
-					initCloudApp("home");
-					return;
-				} else {
-					nav("login-screen");
-					return;
-				}
+				initCloudApp("home");
+				return;
 			}
-
-			document.getElementById("logout-btn").onclick = logoutAdmin;
 
 			await initCloudApp("admin-screen");
 			fetchCloudDataForAdmin("step", "letters");
@@ -209,8 +191,6 @@ document.getElementById("refresh-content-btn").addEventListener("click", async (
 	e.target.classList.remove("button-loading");
 	e.target.disabled = false;
 });
-
-document.getElementById("logout-btn").onclick = logoutUser;
 
 document.getElementById("home-title").onclick = openAdminGate;
 
